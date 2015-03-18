@@ -44,4 +44,11 @@
         android:layout_alignRight="@+id/esitykset"
         android:layout_alignEnd="@+id/esitykset" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Varaukset"
+        android:id="@+id/omatVaraukset"
+        android:layout_toLeftOf="@+id/logout" />
+
 </RelativeLayout>

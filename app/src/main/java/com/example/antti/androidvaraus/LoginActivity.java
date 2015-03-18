@@ -54,6 +54,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private View mProgressView;
     private View mLoginFormView;
     public final static String EXTRA_MESSAGE1 = "com.example.antti.androidvaraus.MESSAGE";
+    private String nimi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,8 +100,19 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         Intent intent = new Intent(this, MainActivity.class);
         EditText editText = (EditText) findViewById(R.id.email);
         String message = editText.getText().toString();
+        String[] list = message.split("@");
+        message = list[0];
+        setNimi(message);
         intent.putExtra(EXTRA_MESSAGE1, message);
         startActivity(intent);
+    }
+
+    private void setNimi(String nimi){
+        this.nimi = nimi;
+    }
+
+    private String getNimi(){
+        return this.nimi;
     }
 
     private void register() {

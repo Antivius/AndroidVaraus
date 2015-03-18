@@ -1,7 +1,9 @@
 package com.example.antti.androidvaraus;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -21,15 +23,34 @@ import java.util.ArrayList;
 public class MainActivity extends ActionBarActivity {
 
     public final static String EXTRA_MESSAGE2 = "com.example.antti.androidvaraus.MESSAGE";
+    public static final String NIMI = "nimi";
+    private String nimi;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        if (!isTaskRoot()) {
+            Intent intent = getIntent();
+            String action = intent.getAction();
+            if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && action != null && action.equals(Intent.ACTION_MAIN)) {
+                finish();
+                return;
+            }
+        }
+
         Intent intent = getIntent();
-        String nimi = intent.getStringExtra(LoginActivity.EXTRA_MESSAGE1);
-        String[] osat = nimi.split("@");
+        nimi = intent.getStringExtra(LoginActivity.EXTRA_MESSAGE1);
+        if(nimi == null){
+            SharedPreferences settings = getPreferences(MODE_PRIVATE);
+            nimi = settings.getString("Nimi", nimi);
+
+        }
+
         TextView textView = (TextView) findViewById(R.id.tervetuloa);
-        textView.setText("Hei " + osat[0] + "!");
+        textView.setText("Hei " + nimi + "!");
 
 
         Spinner spinner = (Spinner) findViewById(R.id.esitykset);
@@ -67,6 +88,18 @@ public class MainActivity extends ActionBarActivity {
                 openVaraus(v);
             }
         });
+
+        Button omatVaraukset = (Button) findViewById(R.id.omatVaraukset);
+        omatVaraukset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openOmatVaraukset(v);
+            }
+        });
+    }
+
+    private void setNimi(String nimi){
+        this.nimi = nimi;
     }
 
     private void openLogin(View view){
@@ -75,10 +108,26 @@ public class MainActivity extends ActionBarActivity {
         finish();
     }
 
+    protected void onPause(){
+        super.onPause();
+
+        SharedPreferences settings = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor ed = settings.edit();
+        ed.putString("Nimi", nimi);
+        ed.commit();
+    }
+
     private void openVaraus(View view){
         Intent intent = new Intent(this, VarausActivity.class);
         Spinner spinner = (Spinner) findViewById(R.id.esitykset);
         String message = spinner.getSelectedItem().toString();
+        intent.putExtra(EXTRA_MESSAGE2, message);
+        startActivity(intent);
+    }
+
+    private void openOmatVaraukset(View view){
+        Intent intent = new Intent(this, OmatVarauksetActivity.class);
+        String message = nimi;
         intent.putExtra(EXTRA_MESSAGE2, message);
         startActivity(intent);
     }
@@ -104,5 +153,19 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putString(NIMI, nimi);
+
+    }
+
+    @Override
+    protected void onRestart(){
+        super.onRestart();
+
+        setNimi(LoginActivity.EXTRA_MESSAGE1);
     }
 }
