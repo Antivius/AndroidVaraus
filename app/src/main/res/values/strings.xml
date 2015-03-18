@@ -12,4 +12,11 @@
     </string-array>
     <string name="title_activity_varaus">VarausActivity</string>
     <string name="error_username_in_use">Username already in use</string>
+    <string name="title_activity_paikka">PaikkaActivity</string>
+    <string name="title_activity_admin">AdminActivity</string>
+    <string name="title_activity_add_movie">AddMovieActivity</string>
+    <string name="title_activity_add_show">AddShowActivity</string>
+    <string name="title_activity_control">ControlActivity</string>
+    <string name="title_activity_add_user">AddUserActivity</string>
+    <string name="title_activity_omat_varaukset">OmatVarauksetActivity</string>
 </resources>

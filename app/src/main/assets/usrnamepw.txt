@@ -1,1 +1,2 @@
 admin@admin:admin
+tuomas@user:tuomas

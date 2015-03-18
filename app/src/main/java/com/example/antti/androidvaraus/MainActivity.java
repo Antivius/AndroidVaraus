@@ -1,6 +1,7 @@
 package com.example.antti.androidvaraus;
 
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,6 +11,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -27,7 +33,21 @@ public class MainActivity extends ActionBarActivity {
 
 
         Spinner spinner = (Spinner) findViewById(R.id.esitykset);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.elokuva_array, android.R.layout.simple_spinner_item);
+        ArrayList<String> arrayList = new ArrayList<String>();
+        try {
+
+            AssetManager am = getAssets();
+            BufferedReader in = null;
+            in = new BufferedReader(new InputStreamReader(am.open("elokuvat.txt")));
+            String line;
+            while((line = in.readLine()) != null){
+                arrayList.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, arrayList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 

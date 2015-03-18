@@ -35,7 +35,62 @@
             android:name=".LoginActivity"
             android:label="@string/title_activity_login"
             android:windowSoftInputMode="adjustResize|stateVisible" >
-
+        </activity>
+        <activity
+            android:name=".PaikkaActivity"
+            android:label="@string/title_activity_paikka"
+            android:parentActivityName=".VarausActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.antti.androidvaraus.VarausActivity" />
+        </activity>
+        <activity
+            android:name=".AdminActivity"
+            android:label="@string/title_activity_admin"
+            android:parentActivityName=".LoginActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.antti.androidvaraus.LoginActivity" />
+        </activity>
+        <activity
+            android:name=".AddMovieActivity"
+            android:label="@string/title_activity_add_movie"
+            android:parentActivityName=".AdminActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.antti.androidvaraus.AdminActivity" />
+        </activity>
+        <activity
+            android:name=".AddShowActivity"
+            android:label="@string/title_activity_add_show"
+            android:parentActivityName=".AdminActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.antti.androidvaraus.AdminActivity" />
+        </activity>
+        <activity
+            android:name=".ControlActivity"
+            android:label="@string/title_activity_control"
+            android:parentActivityName=".AdminActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.antti.androidvaraus.AdminActivity" />
+        </activity>
+        <activity
+            android:name=".AddUserActivity"
+            android:label="@string/title_activity_add_user"
+            android:parentActivityName=".AdminActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.antti.androidvaraus.AdminActivity" />
+        </activity>
+        <activity
+            android:name=".OmatVarauksetActivity"
+            android:label="@string/title_activity_omat_varaukset"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.antti.androidvaraus.MainActivity" />
         </activity>
     </application>
 
