@@ -2,10 +2,10 @@ package com.example.antti.androidvaraus;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.AssetManager;
-import android.support.annotation.NonNull;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,10 +14,10 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -25,6 +25,9 @@ public class MainActivity extends ActionBarActivity {
     public final static String EXTRA_MESSAGE2 = "com.example.antti.androidvaraus.MESSAGE";
     public static final String NIMI = "nimi";
     private String nimi;
+
+    private static final String MOVIE_URL = "http://woodcomb.aleksib.fi/files/elokuvat.txt";
+    private Map<Integer, String> movies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,21 +57,14 @@ public class MainActivity extends ActionBarActivity {
 
 
         Spinner spinner = (Spinner) findViewById(R.id.esitykset);
-        ArrayList<String> arrayList = new ArrayList<String>();
-        try {
 
-            AssetManager am = getAssets();
-            BufferedReader in = null;
-            in = new BufferedReader(new InputStreamReader(am.open("elokuvat.txt")));
-            String line;
-            while((line = in.readLine()) != null){
-                arrayList.add(line);
-            }
-        } catch (IOException e) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
+        try {
+            // Start a background task to download the available movies
+            new DownloadTask().execute(new Pair<>(new URL(MOVIE_URL), adapter));
+        } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, arrayList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
@@ -167,5 +163,38 @@ public class MainActivity extends ActionBarActivity {
         super.onRestart();
 
         setNimi(LoginActivity.EXTRA_MESSAGE1);
+    }
+
+    /**
+     * Downloads movie information from a server in the background.
+     */
+    private class DownloadTask extends AsyncTask<Pair<URL, ArrayAdapter<String>>, Integer, ArrayAdapter<String>> {
+
+        /**
+         * Downloads and parses movie list. Modifies the 'movies' field.
+         * @param pairs URL where movie info is found and
+         *              ArrayAdapter which is used to forward the information to the UI
+         * @return Returns the Adapter to be used later
+         */
+        protected ArrayAdapter<String> doInBackground(Pair<URL, ArrayAdapter<String>>... pairs) {
+            movies = new HashMap<>();
+            if (pairs.length != 1) {
+                return null;
+            }
+
+            String moviesFile = Network.download(pairs[0].first);
+            for (String line : moviesFile.split("\n")) {
+                if (line.length() > 0) {
+                    String[] movie = line.split(":", 2);
+                    movies.put(Integer.parseInt(movie[0]), movie[1]);
+                }
+            }
+
+            return pairs[0].second;
+        }
+
+        protected void onPostExecute(ArrayAdapter<String> adapter) {
+            adapter.addAll(movies.values());
+        }
     }
 }
