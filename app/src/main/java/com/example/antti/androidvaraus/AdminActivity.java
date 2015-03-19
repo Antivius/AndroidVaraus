@@ -1,9 +1,16 @@
 package com.example.antti.androidvaraus;
 
+import android.content.Intent;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
+import java.io.File;
 
 
 public class AdminActivity extends ActionBarActivity {
@@ -12,7 +19,28 @@ public class AdminActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
+        TextView tv = (TextView) findViewById(R.id.adminText);
+        tv.setText("Muutos");
+
+        Button aButton = (Button) findViewById(R.id.adminButton);
+        aButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                writeStuff();
+            }
+        });
+
+        Button aLogout = (Button) findViewById(R.id.aLogout);
+        aLogout.setOnClickListener(new View.OnClickListener() {
+                                      @Override
+                                      public void onClick(View v) {
+                                          openLogin(v);
+                                      }
+                                  }
+        );
     }
+
+
 
 
     @Override
@@ -36,4 +64,29 @@ public class AdminActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    /**
+     * Kirjoitustesti, ei taida toimia
+     */
+
+    public void writeStuff(){
+        TextView tv = (TextView) findViewById(R.id.adminText);
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/folder");
+        myDir.mkdirs();
+        String fname = "testFile";
+        File file = new File (myDir, fname);
+        tv.setText("done");
+    }
+
+    private void openLogin(View view){
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+
+
+
+
 }

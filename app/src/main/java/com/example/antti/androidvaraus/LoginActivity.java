@@ -107,6 +107,11 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         startActivity(intent);
     }
 
+    private void openAdmin(View view){
+        Intent intent = new Intent(this,AdminActivity.class);
+        startActivity(intent);
+    }
+
     private void setNimi(String nimi){
         this.nimi = nimi;
     }
@@ -326,6 +331,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         private final String mEmail;
         private final String mPassword;
+        private String admin = "admin@admin";
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -359,8 +365,15 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             showProgress(false);
 
             if (success) {
-                openMain(findViewById(R.id.email_sign_in_button));
-                finish();
+                if(mEmail.equals(admin)){
+                    openAdmin(findViewById(R.id.email_sign_in_button));
+                    finish();
+                }
+                else{
+                    openMain(findViewById(R.id.email_sign_in_button));
+                    finish();
+                }
+
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
