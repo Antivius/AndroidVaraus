@@ -8,7 +8,6 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -27,14 +26,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-
-
 
 /**
  * A login screen that offers login via email/password.
@@ -55,6 +50,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private View mLoginFormView;
     public final static String EXTRA_MESSAGE1 = "com.example.antti.androidvaraus.MESSAGE";
     private String nimi;
+
+    private static final String USERINFO_URL = "http://woodcomb.aleksib.fi/files/usrnamepw.txt";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,7 +222,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        return email.contains("@") && !email.contains(":");
     }
 
     private boolean isPasswordValid(String password) {
@@ -342,17 +339,15 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                AssetManager am = getAssets();
-                BufferedReader in = new BufferedReader(new InputStreamReader(am.open("usrnamepw.txt")));
-                String line;
-                while((line = in.readLine()) != null){
+                String userInfo = Network.download(new URL(USERINFO_URL));
+
+                for (String line : userInfo.split("\n")) {
                     String[] s = line.split(":");
                     if(s[0].equals(mEmail) && s[1].equals(mPassword)){
                         return true;
                     }
                 }
-
-            } catch (IOException e) {
+            } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
 
@@ -401,24 +396,28 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         @Override
         protected Boolean doInBackground(Void... params) {
+            String userInfo;
 
             try {
-                AssetManager am = getAssets();
-                BufferedReader in = new BufferedReader(new InputStreamReader(am.open("usrnamepw.txt")));
-                String line;
-                while((line = in.readLine()) != null){
+                userInfo = Network.download(new URL(USERINFO_URL));
+                for (String line : userInfo.split("\n")) {
                     String[] s = line.split(":");
                     if(s[0].equals(mEmail)){
                         return false;
                     }
                 }
-
-
-            } catch (IOException e) {
+            } catch (MalformedURLException e) {
                 e.printStackTrace();
+                return false;
             }
 
-            return true;
+            // Upload the new user information
+            StringBuilder sb = new StringBuilder(userInfo);
+            sb.append("\n");
+            sb.append(mEmail);
+            sb.append(":");
+            sb.append(mPassword);
+            return Network.upload(sb.toString(), "usrnamepw.txt");
         }
 
         @Override
@@ -427,7 +426,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             showProgress(false);
 
             if (success) {
-                finish();
+                attemptLogin();
             } else {
                 mPasswordView.setError(getString(R.string.error_username_in_use));
                 mPasswordView.requestFocus();
