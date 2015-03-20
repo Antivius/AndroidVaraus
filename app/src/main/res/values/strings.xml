@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Elokuvavaraus</string>
+    <string name="app_name">AndroidVaraus</string>
 
     <string name="hello_world">Hello world! More text!</string>
     <string name="action_settings">Settings</string>
@@ -10,6 +10,7 @@
         <item>Apinoiden planeetta</item>
         <item>Interstellar</item>
     </string-array>
+    <string name="title_activity_main">Elokuvavaraus</string>
     <string name="title_activity_varaus">VarausActivity</string>
     <string name="error_username_in_use">Username already in use</string>
     <string name="title_activity_paikka">PaikkaActivity</string>
