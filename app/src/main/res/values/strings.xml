@@ -11,7 +11,7 @@
         <item>Interstellar</item>
     </string-array>
     <string name="title_activity_main">Elokuvavaraus</string>
-    <string name="title_activity_varaus">VarausActivity</string>
+    <string name="title_activity_varaus">Valitse näytös</string>
     <string name="error_username_in_use">Username already in use</string>
     <string name="title_activity_paikka">PaikkaActivity</string>
     <string name="title_activity_admin">AdminActivity</string>
