@@ -58,7 +58,7 @@ public class OmatVarauksetActivity extends ActionBarActivity {
         });
     }
 
-    public ArrayList<String> haeVarauksetLista(){
+    private ArrayList<String> haeVarauksetLista(){
         ArrayList<String> lista = new ArrayList<String>();
         String nimi = this.nimi;
         try {

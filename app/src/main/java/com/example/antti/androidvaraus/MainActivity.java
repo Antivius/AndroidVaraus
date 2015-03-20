@@ -117,6 +117,7 @@ public class MainActivity extends ActionBarActivity {
         Intent intent = new Intent(this, VarausActivity.class);
         Spinner spinner = (Spinner) findViewById(R.id.esitykset);
         String message = spinner.getSelectedItem().toString();
+        message = message + ":" + nimi;
         intent.putExtra(EXTRA_MESSAGE2, message);
         startActivity(intent);
     }

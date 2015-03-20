@@ -101,6 +101,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         message = list[0];
         setNimi(message);
         intent.putExtra(EXTRA_MESSAGE1, message);
+        intent.putExtra("kutsuja", "LoginActivity");
         startActivity(intent);
     }
 

@@ -41,9 +41,6 @@
             android:name=".PaikkaActivity"
             android:label="@string/title_activity_paikka"
             android:parentActivityName=".VarausActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.antti.androidvaraus.VarausActivity" />
         </activity>
         <activity
             android:name=".AdminActivity"

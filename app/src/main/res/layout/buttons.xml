@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka1_button1"/>
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka1_button2"/>
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka1_button3"/>
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka1_button4"/>
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka1_button5"/>
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka1_button6"/>
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka1_button7"/>
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka1_button8"/>
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka1_button9"/>
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka1_button10"/>
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button1" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button2" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button3" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button4" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button5" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button6" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button7" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button8" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button9" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button10" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button11" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button12" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button13" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button14" />
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/paikka2_button15" />
+
+
+</LinearLayout>
