@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -118,6 +119,7 @@ public class OmatVarauksetActivity extends ActionBarActivity {
         adapter.remove(varaus);
         varaukset.remove(varaus);
         new PoistaVarausTask().execute(varausRivi);
+        Toast.makeText(this, R.string.varaus_peruttu, Toast.LENGTH_SHORT).show();
     }
 
     private class PoistaVarausTask extends AsyncTask<String, Void, Void> {
