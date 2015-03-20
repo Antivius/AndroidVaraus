@@ -6,9 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.GridView;
+import android.widget.GridLayout;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,14 +21,9 @@ public class ButtonAdapter1 extends BaseAdapter{
     private Context mContext;
     private ArrayList<String> varaukset;
 
-
     public ButtonAdapter1(Context c, ArrayList<String> varaukset) {
         mContext = c;
         this.varaukset = varaukset;
-
-
-
-
     }
 
     public int getCount() {
@@ -53,7 +47,7 @@ public class ButtonAdapter1 extends BaseAdapter{
             // if it's not recycled, initialize some attributes
 
             button = new Button(mContext);
-            button.setLayoutParams(new GridView.LayoutParams(250, 250));
+            button.setLayoutParams(new GridLayout.LayoutParams());
             button.setPadding(8, 8, 8, 8);
             button.setBackgroundColor(Color.GREEN);
             button.setOnClickListener(new View.OnClickListener() {
@@ -74,9 +68,9 @@ public class ButtonAdapter1 extends BaseAdapter{
                     } catch (IOException e){
                         e.printStackTrace();
                     }
-
                 }
             });
+
             for(String s : varaukset){
                 if(s.equals(Integer.toString(position + 1))){
                     button.setBackgroundColor(Color.RED);
@@ -100,6 +94,4 @@ public class ButtonAdapter1 extends BaseAdapter{
             R.id.paikka1_button7, R.id.paikka1_button8,
             R.id.paikka1_button9, R.id.paikka1_button10
     };
-
-
 }

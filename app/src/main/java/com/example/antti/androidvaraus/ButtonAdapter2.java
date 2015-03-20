@@ -6,8 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.GridView;
+import android.widget.GridLayout;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 /**
@@ -20,8 +24,6 @@ public class ButtonAdapter2 extends BaseAdapter {
     public ButtonAdapter2(Context c, ArrayList<String> varaukset) {
         mContext = c;
         this.varaukset = varaukset;
-
-
     }
 
     public int getCount() {
@@ -39,13 +41,13 @@ public class ButtonAdapter2 extends BaseAdapter {
     // create a new Button for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
         final Button button;
-        final int pos;
+        final String pos = Integer.toString(position + 1) + ":";
         if (convertView == null) {
+
             // if it's not recycled, initialize some attributes
 
-            pos = position;
             button = new Button(mContext);
-            button.setLayoutParams(new GridView.LayoutParams(250, 250));
+            button.setLayoutParams(new GridLayout.LayoutParams());
             button.setPadding(8, 8, 8, 8);
             button.setBackgroundColor(Color.GREEN);
             button.setOnClickListener(new View.OnClickListener() {
@@ -54,6 +56,18 @@ public class ButtonAdapter2 extends BaseAdapter {
 
                     button.setBackgroundColor(Color.YELLOW);
                     button.setClickable(false);
+
+                    try {
+                        FileOutputStream fos = mContext.openFileOutput("valinnat", Context.MODE_APPEND);
+                        OutputStreamWriter osw = new OutputStreamWriter(fos);
+                        osw.write (pos);
+                        osw.flush();
+                        osw.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e){
+                        e.printStackTrace();
+                    }
                 }
             });
             for(String s : varaukset){

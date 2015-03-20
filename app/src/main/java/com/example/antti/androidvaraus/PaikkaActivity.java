@@ -1,19 +1,12 @@
 package com.example.antti.androidvaraus;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.PaintDrawable;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -22,7 +15,6 @@ import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -124,7 +116,7 @@ public class PaikkaActivity extends ActionBarActivity {
             resetValinnat.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    gridview.setAdapter(new ButtonAdapter1(getApplicationContext(), varatutPaikat));
+                    gridview.setAdapter(new ButtonAdapter2(getApplicationContext(), varatutPaikat));
                     deleteFile("valinnat");
                     File file = new File(getApplicationContext().getFilesDir(), valinnatTiedosto);
                 }
