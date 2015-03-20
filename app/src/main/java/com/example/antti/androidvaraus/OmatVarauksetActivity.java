@@ -2,146 +2,148 @@ package com.example.antti.androidvaraus;
 
 import android.app.TaskStackBuilder;
 import android.content.Intent;
-import android.content.res.AssetManager;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Spinner;
+import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class OmatVarauksetActivity extends ActionBarActivity {
 
-    public final static String EXTRA_MESSAGE3 = "com.example.antti.androidvaraus.MESSAGE";
-    private String nimi;
+//    public final static String EXTRA_MESSAGE3 = "com.example.antti.androidvaraus.MESSAGE";
+    private static final String VARAUS_URL = "http://woodcomb.aleksib.fi/files/varaukset.txt";
+    private static final String NAYTOS_URL = "http://woodcomb.aleksib.fi/files/naytokset.txt";
+    private String email;
+    private Map<String, String> varaukset;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_omat_varaukset);
         Intent intent = getIntent();
-        nimi = intent.getStringExtra(MainActivity.EXTRA_MESSAGE2);
+        email = intent.getStringExtra(MainActivity.EXTRA_MESSAGE2);
 
-        ArrayList<String> listViewarrayList = haeVarauksetLista();
-        ArrayList<String> spinnerarrayList = haeVarauksetSpinner();
+        final ListView listView = (ListView) findViewById(R.id.varaukset);
+        final TextView poistettavaVaraus = (TextView) findViewById(R.id.poistettavaVaraus);
 
-        ListView listView = (ListView) findViewById(R.id.varaukset);
-        Spinner spinner = (Spinner) findViewById(R.id.poistettavaVaraus);
-
-        ArrayAdapter<String> listadapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listViewarrayList);
+        final ArrayAdapter<String> listadapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         listView.setAdapter(listadapter);
+        new HaeVarauksetTask().execute(listadapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Object listItem = listView.getItemAtPosition(position);
+                poistettavaVaraus.setText(listItem.toString());
+            }
+        });
 
-        ArrayAdapter<String> spinneradapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinnerarrayList);
-        spinneradapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(spinneradapter);
-
-        Button peruvaraus = (Button) findViewById(R.id.peru_varaus_button);
-        peruvaraus.setOnClickListener(new View.OnClickListener() {
+        Button peruVaraus = (Button) findViewById(R.id.peru_varaus_button);
+        peruVaraus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                poistaVaraus();
+                poistaVaraus(poistettavaVaraus, listadapter);
             }
         });
     }
 
-    private ArrayList<String> haeVarauksetLista(){
-        ArrayList<String> lista = new ArrayList<String>();
-        String nimi = this.nimi;
-        try {
+    private class HaeVarauksetTask extends AsyncTask<ArrayAdapter<String>, Void, ArrayAdapter<String>> {
+        protected ArrayAdapter<String> doInBackground(ArrayAdapter<String>... adapters) {
+            varaukset = new HashMap<>();
 
-            AssetManager am = getAssets();
-            BufferedReader in1 = null;
+            if (adapters.length != 1) {
+                return null;
+            }
 
-            in1 = new BufferedReader(new InputStreamReader(am.open("varaukset.txt")));
+            try {
+                String varausFile = Network.download(new URL(VARAUS_URL));
+                String naytosFile = Network.download(new URL(NAYTOS_URL));
 
-            String line1;
-            String line2;
-            while((line1 = in1.readLine()) != null){
-                String viesti1 = "";
-                String viesti2 = "";
-                String[] osat1;
-                osat1 = line1.split(":");
-                String id;
-                if(osat1[1].equals(nimi)){
-                    id = osat1[0];
-                    BufferedReader in2 = null;
-                    in2 = new BufferedReader(new InputStreamReader(am.open("naytokset.txt")));
-                    while((line2 = in2.readLine()) != null){
-                        String[] osat2;
-                        osat2 = line2.split(":");
-                        if(osat2[0].equals(id)){
-                            viesti1 = osat2[3] + " " + osat2[4] + " " + osat2[1] + " " + osat2[2] + " " + osat2[5] + " Paikat: ";
-                            for(int i = 2; i < osat1.length; i++){
-                                viesti1 = viesti1.concat(" " + osat1[i]);
+                for (String varausRivi : varausFile.split("\n")) {
+                    String[] varaus = varausRivi.split(":");
+                    if (varaus[1].equals(email)) {
+                        String naytosId = varaus[0];
+                        for (String naytosRivi : naytosFile.split("\n")) {
+                            String[] naytos = naytosRivi.split(":", 6);
+                            if (naytos[0].equals(naytosId)) {
+                                StringBuilder sb = new StringBuilder();
+                                sb.append(naytos[3]); // Pvm
+                                sb.append(" ");
+                                sb.append(naytos[4]); // Klo
+                                sb.append(" ");
+                                sb.append(naytos[1]); // Teatteri
+                                sb.append(" ");
+                                sb.append(naytos[2]); // Sali
+                                sb.append(" ");
+                                sb.append(naytos[5]); // Nimi
+                                sb.append(" Paikat:");
+                                for(int i = 2; i < varaus.length; i++){
+                                    sb.append(" ");
+                                    sb.append(varaus[i]);
 
+                                }
+
+                                varaukset.put(sb.toString(), varausRivi);
                             }
-                            lista.add(viesti1);
-
                         }
                     }
                 }
-
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            return adapters[0];
         }
-        return lista;
+
+        protected void onPostExecute(ArrayAdapter<String> adapter) {
+            adapter.addAll(varaukset.keySet());
+        }
     }
 
-    public ArrayList<String> haeVarauksetSpinner(){
-        ArrayList<String> lista = new ArrayList<String>();
-        String nimi = this.nimi;
+    public void poistaVaraus(TextView view, ArrayAdapter<String> adapter) {
+        String varaus = view.getText().toString();
+        String varausRivi = varaukset.get(varaus);
+        adapter.remove(varaus);
+        varaukset.remove(varaus);
+        new PoistaVarausTask().execute(varausRivi);
+    }
 
-        try {
+    private class PoistaVarausTask extends AsyncTask<String, Void, Void> {
+        protected Void doInBackground(String... strings) {
+            if (strings.length != 1) {
+                return null;
+            }
 
-            AssetManager am = getAssets();
-            BufferedReader in1 = null;
+            try {
+                String varausFile = Network.download(new URL(VARAUS_URL));
+                StringBuilder sb = new StringBuilder(varausFile.length());
 
-            in1 = new BufferedReader(new InputStreamReader(am.open("varaukset.txt")));
-
-            String line1;
-            String line2;
-            while((line1 = in1.readLine()) != null){
-                String viesti2 = "";
-                String[] osat1;
-                osat1 = line1.split(":");
-                String id;
-                if(osat1[1].equals(nimi)){
-                    id = osat1[0];
-                    BufferedReader in2 = null;
-                    in2 = new BufferedReader(new InputStreamReader(am.open("naytokset.txt")));
-                    while((line2 = in2.readLine()) != null){
-                        String[] osat2;
-                        osat2 = line2.split(":");
-                        if(osat2[0].equals(id)){
-                            viesti2 = osat2[3] + " " + osat2[4] + " " + osat2[1] + " " + osat2[2] + " " + osat2[5];
-                            lista.add(viesti2);
-                        }
+                for (String varausRivi : varausFile.split("\n")) {
+                    if (!varausRivi.equals(strings[0])) {
+                        sb.append(varausRivi);
+                        sb.append("\n");
                     }
                 }
 
+                Network.upload(sb.toString(), "varaukset.txt");
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            return null;
         }
-        return lista;
-    }
-
-    public void poistaVaraus(){
-        //TODO: varauksen poisto = tekstitiedoston muokkaaminen
-    }
-
-    private String getNimi(){
-        return this.nimi;
     }
 
     @Override
