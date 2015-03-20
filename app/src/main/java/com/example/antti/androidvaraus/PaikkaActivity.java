@@ -1,15 +1,12 @@
 package com.example.antti.androidvaraus;
 
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -20,21 +17,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 
 public class PaikkaActivity extends ActionBarActivity {
-
-
-    private String naytos;
-    private String[] naytosdata;
+    private static final String VARAUS_URL = "http://woodcomb.aleksib.fi/files/varaukset.txt";
+    private String varausFile;
+    private String[] naytos;
     private ArrayList<String> varatutPaikat;
     private String kayttaja;
     private Integer[] buttonIdt1;
     private Integer[] buttonIdt2;
     private String valinnatTiedosto;
     private File file;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,21 +42,24 @@ public class PaikkaActivity extends ActionBarActivity {
         Intent intent = getIntent();
         String[] s = intent.getStringExtra(VarausActivity.EXTRA_MESSAGE3).split(":", 2);
         kayttaja = s[0];
-        naytos = s[1];
-        naytosdata = naytos.split(":", 6);
-        varatutPaikat = haeVarauksetLista();
+        naytos = s[1].split(":", 6);
+
+        try {
+            new HaeVarauksetTask().execute().get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
         buttonIdt1 = haeButtonIdt("Sali1");
         buttonIdt2 = haeButtonIdt("Sali2");
         valinnatTiedosto = "valinnat";
         File file = new File(this.getFilesDir(), valinnatTiedosto);
         this.file = file;
 
-        if(naytosdata[2].equals("Sali1")){
+        if(naytos[2].equals("Sali1")){
             setContentView(R.layout.activity_paikka1);
             TextView textView = (TextView) findViewById(R.id.naytoksen_data1);
-            textView.setText(naytosdata[0]);
-
-
+            textView.setText(naytos[0]);
 
             Button keskeytaVaraus = (Button)  findViewById(R.id.keskeyta_varaus_button1);
 
@@ -77,7 +79,7 @@ public class PaikkaActivity extends ActionBarActivity {
                 public void onClick(View v) {
                     gridview.setAdapter(new ButtonAdapter1(getApplicationContext(), varatutPaikat));
                     deleteFile("valinnat");
-                    File file = new File(getApplicationContext().getFilesDir(), valinnatTiedosto);
+                    new File(getApplicationContext().getFilesDir(), valinnatTiedosto);
                 }
             });
 
@@ -92,9 +94,7 @@ public class PaikkaActivity extends ActionBarActivity {
         } else{
             setContentView(R.layout.activity_paikka2);
             TextView textView = (TextView) findViewById(R.id.naytoksen_data2);
-            textView.setText(naytosdata[0]);
-
-
+            textView.setText(naytos[0]);
 
             Button keskeytaVaraus = (Button)  findViewById(R.id.keskeyta_varaus_button2);
 
@@ -114,7 +114,7 @@ public class PaikkaActivity extends ActionBarActivity {
                 public void onClick(View v) {
                     gridview.setAdapter(new ButtonAdapter2(getApplicationContext(), varatutPaikat));
                     deleteFile("valinnat");
-                    File file = new File(getApplicationContext().getFilesDir(), valinnatTiedosto);
+                    new File(getApplicationContext().getFilesDir(), valinnatTiedosto);
                 }
             });
 
@@ -126,79 +126,43 @@ public class PaikkaActivity extends ActionBarActivity {
                 }
             });
             }
-
-
-
-
         }
 
-//    private class NaytosTask extends AsyncTask<Pair<URL, ArrayAdapter<String>>, Void, Void> {
-//        protected Void doInBackground(Pair<URL, ArrayAdapter<String>>... pairs) {
-//            if (pairs.length != 1) {
-//                return null;
-//            }
-//
-//            String naytokset = Network.download(pairs[0].first);
-//            for (String line : naytokset.split("\n")) {
-//                //formaatti: ID:Teatteri:Sali:Pvm:Klo:Nimi
-//                //001:Teatteri1:Sali1:18.03.2015:18.00:Interstellar
-//                String[] osat = line.split(":", 6);
-//                if (elokuva.equals("Kaikki")) {
-//                    String naytos = osat[3] + " " + osat[4] + " " + osat[5] + " " + osat[1] + " " + osat[2] + " id: " + osat[0] ;
-//                    pairs[0].second.add(naytos);
-//                } else {
-//                    if (osat[5].equals(elokuva)) {
-//                        String naytos = osat[3] + " " + osat[4] + " " + osat[5] + " " + osat[1] + " " + osat[2] + " id: " + osat[0] ;
-//                        pairs[0].second.add(naytos);
-//                    }
-//                }
-//            }
-//
-//            return null;
-//        }
-//    }
+    private class HaeVarauksetTask extends AsyncTask<Void, Void, Void> {
+        protected Void doInBackground(Void... _) {
+            varatutPaikat = new ArrayList<>();
+            String naytosId = naytos[0];
 
-    private ArrayList<String> haeVarauksetLista(){
-        ArrayList<String> lista = new ArrayList<String>();
-        String naytos = this.naytosdata[0];
-        try {
-
-            AssetManager am = getAssets();
-            BufferedReader in1 = null;
-
-            in1 = new BufferedReader(new InputStreamReader(am.open("varaukset.txt")));
-
-            String line;
-            while((line = in1.readLine()) != null){
-                String[] osat;
-                osat = line.split(":");
-                String id;
-                if(osat[0].equals(naytos)){
-                    for(int i = 2; i < osat.length; i++){
-                        lista.add(osat[i]);
+            try {
+                varausFile = Network.download(new URL(VARAUS_URL));
+                for (String line : varausFile.split("\n")) {
+                    String[] varaus = line.split(":");
+                    if (varaus[0].equals(naytosId)) {
+                        for(int i = 2; i < varaus.length; i++){
+                            varatutPaikat.add(varaus[i]);
+                        }
                     }
                 }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            return null;
         }
-        return lista;
     }
 
     private Integer[] haeButtonIdt(String sali){
 
         if(sali.equals("Sali1")){
-            Integer[] buttonit = {
+            return new Integer[]{
                     R.id.paikka1_button1, R.id.paikka1_button2,
                     R.id.paikka1_button3, R.id.paikka1_button4,
                     R.id.paikka1_button5, R.id.paikka1_button6,
                     R.id.paikka1_button7, R.id.paikka1_button8,
                     R.id.paikka1_button9, R.id.paikka1_button10
             };
-            return buttonit;
-
         }else{
-            Integer[] buttonit = {
+            return new Integer[]{
                     R.id.paikka2_button1, R.id.paikka2_button2,
                     R.id.paikka2_button3, R.id.paikka2_button4,
                     R.id.paikka2_button5, R.id.paikka2_button6,
@@ -208,13 +172,9 @@ public class PaikkaActivity extends ActionBarActivity {
                     R.id.paikka2_button13, R.id.paikka2_button14,
                     R.id.paikka2_button15
             };
-            return buttonit;
         }
 
     }
-
-
-
 
     private void hyvaksyValinnat(){
         /**
@@ -228,40 +188,54 @@ public class PaikkaActivity extends ActionBarActivity {
         String s;
         String[] valinnat = null;
 
-            try{
-                FileInputStream in = openFileInput("valinnat");
-                InputStreamReader isr = new InputStreamReader(in);
-                BufferedReader buffreader = new BufferedReader(isr) ;
+        try{
+            FileInputStream in = openFileInput("valinnat");
+            InputStreamReader isr = new InputStreamReader(in);
+            BufferedReader buffreader = new BufferedReader(isr) ;
 
 
-                String readString = buffreader.readLine ( ) ;
-                while(readString != null){
-                    datax.append(readString);
-                    readString = buffreader.readLine() ;
-                }
-
-                isr.close ( ) ;
-                deleteFile("valinnat");
-                s = datax.toString();
-                valinnat = s.split(":");
-
-                Toast.makeText(this,datax,Toast.LENGTH_SHORT).show();
-            }catch(IOException e) {
-                e.printStackTrace();
+            String readString = buffreader.readLine ( ) ;
+            while(readString != null){
+                datax.append(readString);
+                readString = buffreader.readLine() ;
             }
 
-        kirjoitaVaraus(valinnat);
-    }
+            isr.close();
+            deleteFile("valinnat");
+            s = datax.toString();
+            valinnat = s.split(":");
 
-    private void kirjoitaVaraus(String[] valinnat){
-        //TODO: luo oikeanlainen varausrivi (esim. 001:tuomas:1:2:3) ja kirjoita serverillä olevaan tiedostoon
+            Toast.makeText(this,datax,Toast.LENGTH_SHORT).show();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
 
-//        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-//        intent.putExtra("kutsuja", "PaikkaActivity");
-//        startActivity(intent);
+        new KirjoitaVarausTask().execute(valinnat);
         finish();
     }
 
+    private class KirjoitaVarausTask extends AsyncTask<String, Void, Void> {
+        protected Void doInBackground(String... strings) {
+            if (strings.length < 1) {
+                return null;
+            }
+
+            StringBuilder varaus = new StringBuilder(naytos[0] + ":" + kayttaja);
+            for (String paikka : strings) {
+                varaus.append(":");
+                varaus.append(paikka);
+            }
+
+            if (varausFile.endsWith("\n")) {
+                varausFile += varaus.toString();
+            } else {
+                varausFile += "\n" + varaus.toString();
+            }
+
+            Network.upload(varausFile, "varaukset.txt");
+            return null;
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
