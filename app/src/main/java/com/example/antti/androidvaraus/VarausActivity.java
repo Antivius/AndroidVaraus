@@ -2,8 +2,8 @@ package com.example.antti.androidvaraus;
 
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,12 +12,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 
@@ -32,9 +29,9 @@ public class VarausActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_varaus);
         Intent intent = getIntent();
-        String[] osat = intent.getStringExtra(MainActivity.EXTRA_MESSAGE2).split(":");
-        elokuva = osat[0];
-        kayttaja = osat[1];
+        String[] osat = intent.getStringExtra(MainActivity.EXTRA_MESSAGE2).split(":", 2);
+        kayttaja = osat[0];
+        elokuva = osat[1];
         TextView naytos = (TextView) findViewById(R.id.naytos_teksti);
         final TextView nappulaPainettu = (TextView) findViewById(R.id.nappula_painettu);
         if(elokuva.equals("Kaikki")){

@@ -3,8 +3,8 @@ package com.example.antti.androidvaraus;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,8 +16,6 @@ import android.widget.TextView;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -27,7 +25,6 @@ public class MainActivity extends ActionBarActivity {
     private String nimi;
 
     private static final String MOVIE_URL = "http://woodcomb.aleksib.fi/files/elokuvat.txt";
-    private Map<Integer, String> movies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,7 +114,7 @@ public class MainActivity extends ActionBarActivity {
         Intent intent = new Intent(this, VarausActivity.class);
         Spinner spinner = (Spinner) findViewById(R.id.esitykset);
         String message = spinner.getSelectedItem().toString();
-        message = message + ":" + nimi;
+        message = nimi + ":" + message;
         intent.putExtra(EXTRA_MESSAGE2, message);
         startActivity(intent);
     }
@@ -169,7 +166,7 @@ public class MainActivity extends ActionBarActivity {
     /**
      * Downloads movie information from a server in the background.
      */
-    private class DownloadTask extends AsyncTask<Pair<URL, ArrayAdapter<String>>, Integer, ArrayAdapter<String>> {
+    private class DownloadTask extends AsyncTask<Pair<URL, ArrayAdapter<String>>, Integer, Void> {
 
         /**
          * Downloads and parses movie list. Modifies the 'movies' field.
@@ -177,25 +174,19 @@ public class MainActivity extends ActionBarActivity {
          *              ArrayAdapter which is used to forward the information to the UI
          * @return Returns the Adapter to be used later
          */
-        protected ArrayAdapter<String> doInBackground(Pair<URL, ArrayAdapter<String>>... pairs) {
-            movies = new HashMap<>();
+        protected Void doInBackground(Pair<URL, ArrayAdapter<String>>... pairs) {
             if (pairs.length != 1) {
                 return null;
             }
 
             String moviesFile = Network.download(pairs[0].first);
-            for (String line : moviesFile.split("\n")) {
-                if (line.length() > 0) {
-                    String[] movie = line.split(":", 2);
-                    movies.put(Integer.parseInt(movie[0]), movie[1]);
+            for (String movie : moviesFile.split("\n")) {
+                if (movie.length() > 0) {
+                    pairs[0].second.add(movie);
                 }
             }
 
-            return pairs[0].second;
-        }
-
-        protected void onPostExecute(ArrayAdapter<String> adapter) {
-            adapter.addAll(movies.values());
+            return null;
         }
     }
 }
