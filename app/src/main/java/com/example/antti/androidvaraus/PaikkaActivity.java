@@ -2,11 +2,14 @@ package com.example.antti.androidvaraus;
 
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -17,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 
 
@@ -37,10 +41,10 @@ public class PaikkaActivity extends ActionBarActivity {
 
 
         Intent intent = getIntent();
-        String[] s = intent.getStringExtra(VarausActivity.EXTRA_MESSAGE3).split(":");
-        naytos = s[0];
-        naytosdata = haeNaytosData(naytos);
-        kayttaja = s[1];
+        String[] s = intent.getStringExtra(VarausActivity.EXTRA_MESSAGE3).split(":", 2);
+        kayttaja = s[0];
+        naytos = s[1];
+        naytosdata = naytos.split(":", 6);
         varatutPaikat = haeVarauksetLista();
         buttonIdt1 = haeButtonIdt("Sali1");
         buttonIdt2 = haeButtonIdt("Sali2");
@@ -51,7 +55,7 @@ public class PaikkaActivity extends ActionBarActivity {
         if(naytosdata[2].equals("Sali1")){
             setContentView(R.layout.activity_paikka1);
             TextView textView = (TextView) findViewById(R.id.naytoksen_data1);
-            textView.setText(naytos);
+            textView.setText(naytosdata[0]);
 
 
 
@@ -60,11 +64,7 @@ public class PaikkaActivity extends ActionBarActivity {
             keskeytaVaraus.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    intent.putExtra("kutsuja", "PaikkaActivity");
-                    startActivity(intent);
                     finish();
-
                 }
             });
 
@@ -92,7 +92,7 @@ public class PaikkaActivity extends ActionBarActivity {
         } else{
             setContentView(R.layout.activity_paikka2);
             TextView textView = (TextView) findViewById(R.id.naytoksen_data2);
-            textView.setText(naytos);
+            textView.setText(naytosdata[0]);
 
 
 
@@ -101,11 +101,7 @@ public class PaikkaActivity extends ActionBarActivity {
             keskeytaVaraus.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    intent.putExtra("kutsuja", "PaikkaActivity");
-                    startActivity(intent);
                     finish();
-
                 }
             });
 
@@ -136,38 +132,35 @@ public class PaikkaActivity extends ActionBarActivity {
 
         }
 
-
-
-
-
-
-    private String[] haeNaytosData(String id){
-        String[] palautus = new String[10];
-        try {
-
-            AssetManager am = getAssets();
-            BufferedReader in1 = null;
-
-            in1 = new BufferedReader(new InputStreamReader(am.open("naytokset.txt")));
-
-            String line1;
-            while((line1 = in1.readLine()) != null){
-                String viesti1 = "";
-                String[] osat1;
-                osat1 = line1.split(":");
-                if(id.equals(osat1[0])){
-                    palautus = osat1;
-                }
-            }
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
-        return palautus;
-    }
+//    private class NaytosTask extends AsyncTask<Pair<URL, ArrayAdapter<String>>, Void, Void> {
+//        protected Void doInBackground(Pair<URL, ArrayAdapter<String>>... pairs) {
+//            if (pairs.length != 1) {
+//                return null;
+//            }
+//
+//            String naytokset = Network.download(pairs[0].first);
+//            for (String line : naytokset.split("\n")) {
+//                //formaatti: ID:Teatteri:Sali:Pvm:Klo:Nimi
+//                //001:Teatteri1:Sali1:18.03.2015:18.00:Interstellar
+//                String[] osat = line.split(":", 6);
+//                if (elokuva.equals("Kaikki")) {
+//                    String naytos = osat[3] + " " + osat[4] + " " + osat[5] + " " + osat[1] + " " + osat[2] + " id: " + osat[0] ;
+//                    pairs[0].second.add(naytos);
+//                } else {
+//                    if (osat[5].equals(elokuva)) {
+//                        String naytos = osat[3] + " " + osat[4] + " " + osat[5] + " " + osat[1] + " " + osat[2] + " id: " + osat[0] ;
+//                        pairs[0].second.add(naytos);
+//                    }
+//                }
+//            }
+//
+//            return null;
+//        }
+//    }
 
     private ArrayList<String> haeVarauksetLista(){
         ArrayList<String> lista = new ArrayList<String>();
-        String naytos = this.naytos;
+        String naytos = this.naytosdata[0];
         try {
 
             AssetManager am = getAssets();
@@ -263,9 +256,9 @@ public class PaikkaActivity extends ActionBarActivity {
     private void kirjoitaVaraus(String[] valinnat){
         //TODO: luo oikeanlainen varausrivi (esim. 001:tuomas:1:2:3) ja kirjoita serverillä olevaan tiedostoon
 
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        intent.putExtra("kutsuja", "PaikkaActivity");
-        startActivity(intent);
+//        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+//        intent.putExtra("kutsuja", "PaikkaActivity");
+//        startActivity(intent);
         finish();
     }
 
