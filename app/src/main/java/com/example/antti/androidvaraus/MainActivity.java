@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -25,12 +26,12 @@ public class MainActivity extends ActionBarActivity {
     private String nimi;
 
     private static final String MOVIE_URL = "http://woodcomb.aleksib.fi/files/elokuvat.txt";
+    ArrayList<String> movies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         if (!isTaskRoot()) {
             Intent intent = getIntent();
@@ -45,17 +46,19 @@ public class MainActivity extends ActionBarActivity {
         nimi = intent.getStringExtra(LoginActivity.EXTRA_MESSAGE1);
         if(nimi == null){
             SharedPreferences settings = getPreferences(MODE_PRIVATE);
-            nimi = settings.getString("Nimi", nimi);
+            nimi = settings.getString("Nimi", null);
 
+            if (nimi == null) {
+                openLogin(null);
+            }
         }
 
         TextView textView = (TextView) findViewById(R.id.tervetuloa);
         textView.setText("Hei " + nimi + "!");
 
-
         Spinner spinner = (Spinner) findViewById(R.id.esitykset);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
         try {
             // Start a background task to download the available movies
             new DownloadTask().execute(new Pair<>(new URL(MOVIE_URL), adapter));
@@ -91,10 +94,6 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
-    private void setNimi(String nimi){
-        this.nimi = nimi;
-    }
-
     private void openLogin(View view){
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
@@ -107,7 +106,7 @@ public class MainActivity extends ActionBarActivity {
         SharedPreferences settings = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor ed = settings.edit();
         ed.putString("Nimi", nimi);
-        ed.commit();
+        ed.apply();
     }
 
     private void openVaraus(View view){
@@ -159,14 +158,12 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onRestart(){
         super.onRestart();
-
-        setNimi(LoginActivity.EXTRA_MESSAGE1);
     }
 
     /**
      * Downloads movie information from a server in the background.
      */
-    private class DownloadTask extends AsyncTask<Pair<URL, ArrayAdapter<String>>, Integer, Void> {
+    private class DownloadTask extends AsyncTask<Pair<URL, ArrayAdapter<String>>, Void, ArrayAdapter<String>> {
 
         /**
          * Downloads and parses movie list. Modifies the 'movies' field.
@@ -174,7 +171,8 @@ public class MainActivity extends ActionBarActivity {
          *              ArrayAdapter which is used to forward the information to the UI
          * @return Returns the Adapter to be used later
          */
-        protected Void doInBackground(Pair<URL, ArrayAdapter<String>>... pairs) {
+        protected ArrayAdapter<String> doInBackground(Pair<URL, ArrayAdapter<String>>... pairs) {
+            movies = new ArrayList<>();
             if (pairs.length != 1) {
                 return null;
             }
@@ -182,11 +180,15 @@ public class MainActivity extends ActionBarActivity {
             String moviesFile = Network.download(pairs[0].first);
             for (String movie : moviesFile.split("\n")) {
                 if (movie.length() > 0) {
-                    pairs[0].second.add(movie);
+                    movies.add(movie);
                 }
             }
 
-            return null;
+            return pairs[0].second;
+        }
+
+        protected void onPostExecute(ArrayAdapter<String> adapter) {
+            adapter.addAll(movies);
         }
     }
 }
