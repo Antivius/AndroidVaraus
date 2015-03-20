@@ -24,6 +24,7 @@ public class MainActivity extends ActionBarActivity {
     public final static String EXTRA_MESSAGE2 = "com.example.antti.androidvaraus.MESSAGE";
     public static final String NIMI = "nimi";
     private String nimi;
+    private String email;
 
     private static final String MOVIE_URL = "http://woodcomb.aleksib.fi/files/elokuvat.txt";
     ArrayList<String> movies;
@@ -43,14 +44,18 @@ public class MainActivity extends ActionBarActivity {
         }
 
         Intent intent = getIntent();
-        nimi = intent.getStringExtra(LoginActivity.EXTRA_MESSAGE1);
-        if(nimi == null){
+        email = intent.getStringExtra(LoginActivity.EXTRA_MESSAGE1);
+        if(email == null){
             SharedPreferences settings = getPreferences(MODE_PRIVATE);
-            nimi = settings.getString("Nimi", null);
+            email = settings.getString("Email", null);
 
-            if (nimi == null) {
+            if (email == null) {
                 openLogin(null);
+            } else {
+                nimi = email.split("@")[0];
             }
+        } else {
+            nimi = email.split("@")[0];
         }
 
         TextView textView = (TextView) findViewById(R.id.tervetuloa);
@@ -74,8 +79,7 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 openLogin(v);
             }
-        }
-        );
+        });
 
         Button varaa = (Button) findViewById(R.id.varaus_button);
         varaa.setOnClickListener(new View.OnClickListener() {
@@ -105,7 +109,7 @@ public class MainActivity extends ActionBarActivity {
 
         SharedPreferences settings = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor ed = settings.edit();
-        ed.putString("Nimi", nimi);
+        ed.putString("Email", email);
         ed.apply();
     }
 
@@ -113,15 +117,14 @@ public class MainActivity extends ActionBarActivity {
         Intent intent = new Intent(this, VarausActivity.class);
         Spinner spinner = (Spinner) findViewById(R.id.esitykset);
         String message = spinner.getSelectedItem().toString();
-        message = nimi + ":" + message;
+        message = email + ":" + message;
         intent.putExtra(EXTRA_MESSAGE2, message);
         startActivity(intent);
     }
 
     private void openOmatVaraukset(View view){
         Intent intent = new Intent(this, OmatVarauksetActivity.class);
-        String message = nimi;
-        intent.putExtra(EXTRA_MESSAGE2, message);
+        intent.putExtra(EXTRA_MESSAGE2, email);
         startActivity(intent);
     }
 
