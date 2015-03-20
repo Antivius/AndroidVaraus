@@ -31,18 +31,14 @@ public class OmatVarauksetActivity extends ActionBarActivity {
         Intent intent = getIntent();
         nimi = intent.getStringExtra(MainActivity.EXTRA_MESSAGE2);
 
-
-
         ArrayList<String> listViewarrayList = haeVarauksetLista();
         ArrayList<String> spinnerarrayList = haeVarauksetSpinner();
-
 
         ListView listView = (ListView) findViewById(R.id.varaukset);
         Spinner spinner = (Spinner) findViewById(R.id.poistettavaVaraus);
 
         ArrayAdapter<String> listadapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listViewarrayList);
         listView.setAdapter(listadapter);
-
 
         ArrayAdapter<String> spinneradapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinnerarrayList);
         spinneradapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -52,7 +48,6 @@ public class OmatVarauksetActivity extends ActionBarActivity {
         peruvaraus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 poistaVaraus();
             }
         });
@@ -188,8 +183,6 @@ public class OmatVarauksetActivity extends ActionBarActivity {
 
     @Override
     public void onBackPressed(){
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        startActivity(intent);
+        finish();
     }
 }
