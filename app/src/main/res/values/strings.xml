@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">AndroidVaraus</string>
 
-    <string name="hello_world">Hello world! More text!</string>
+    <string name="adminHello">Hallintapaneli</string>
     <string name="action_settings">Settings</string>
     <string name="new_button">New Button</string>
     <string name="varaus_button">Varaa</string>
@@ -21,4 +21,10 @@
     <string name="title_activity_add_user">AddUserActivity</string>
     <string name="title_activity_omat_varaukset">Varaukset</string>
     <string name="varaus_peruttu">Varaus peruttu</string>
+    <string name="add_movie_text">Elokuva</string>
+    <string name="add_user_button">Lisää</string>
+    <string name="deleteUserButton">Poista</string>
+    <string name="mangeMoviesButton">Hallitse elokuvia</string>
+    <string name="a_manageUsers">Hallitse käyttäjiä</string>
+    <string name="add_user_text">Lisää käyttäjä XX@XX:salasana</string>
 </resources>

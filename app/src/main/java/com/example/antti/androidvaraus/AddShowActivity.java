@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 public class AddShowActivity extends ActionBarActivity {
 
+    //TODO: Samat posistot ja lisäykset kuin elokuvissa ja käyttäjissä, kirjotussysteemi ei taida taipua muokkaukseen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -19,14 +19,28 @@ public class AdminActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
-        TextView tv = (TextView) findViewById(R.id.adminText);
-        tv.setText("Muutos");
 
-        Button aButton = (Button) findViewById(R.id.adminButton);
+        Button aButton = (Button) findViewById(R.id.manageMoviesButton);
         aButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                writeStuff();
+                manageMovies(findViewById(R.id.manageMoviesButton));
+            }
+        });
+
+        Button manageUsersbutton = (Button) findViewById(R.id.manageUsersButton);
+        manageUsersbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                manageUsers(findViewById(R.id.manageMoviesButton));
+            }
+        });
+
+        final Button manageShowbutton = (Button) findViewById(R.id.manageShowButton);
+        manageShowbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                manageShow(findViewById(R.id.manageShowButton));
             }
         });
 
@@ -38,6 +52,8 @@ public class AdminActivity extends ActionBarActivity {
                                       }
                                   }
         );
+
+
     }
 
 
@@ -64,6 +80,25 @@ public class AdminActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+
+
+    public  void manageMovies(View view){
+        Intent intent = new Intent(this,AddMovieActivity.class);
+        startActivity(intent);
+    }
+
+    public  void manageUsers(View view){
+        Intent intent = new Intent(this,AddUserActivity.class);
+        startActivity(intent);
+    }
+
+    public void manageShow(View view){
+        Intent intent = new Intent(this,AddShowActivity.class);
+        startActivity(intent);
+    }
+
 
     /**
      * Kirjoitustesti, ei taida toimia
