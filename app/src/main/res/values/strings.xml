@@ -3,7 +3,6 @@
 
     <string name="adminHello">Hallintapaneeli</string>
     <string name="action_settings">Settings</string>
-    <string name="new_button">New Button</string>
     <string name="varaus_button">Varaa</string>
     <string-array name="elokuva_array">
         <item>Harry Potter</item>
@@ -13,12 +12,12 @@
     <string name="title_activity_main">Elokuvavaraus</string>
     <string name="title_activity_varaus">Valitse näytös</string>
     <string name="error_username_in_use">Käyttäjänimi on jo käytössä</string>
-    <string name="title_activity_paikka">PaikkaActivity</string>
-    <string name="title_activity_admin">AdminActivity</string>
+    <string name="title_activity_paikka">Valitse paikat</string>
+    <string name="title_activity_admin">Hallinta</string>
     <string name="title_activity_add_movie">Hallitse elokuvia</string>
-    <string name="title_activity_add_show">AddShowActivity</string>
+    <string name="title_activity_add_show">Hallitse näytöksiä</string>
     <string name="title_activity_control">ControlActivity</string>
-    <string name="title_activity_add_user">AddUserActivity</string>
+    <string name="title_activity_add_user">Hallitse käyttäjiä</string>
     <string name="title_activity_omat_varaukset">Varaukset</string>
     <string name="varaus_peruttu">Varaus peruttu</string>
     <string name="add_movie_text">Elokuva</string>
@@ -26,9 +25,16 @@
     <string name="deleteUserButton">Poista</string>
     <string name="mangeMoviesButton">Hallitse elokuvia</string>
     <string name="a_manageUsers">Hallitse käyttäjiä</string>
-    <string name="add_user_text">Lisää käyttäjä XX@XX:salasana</string>
-    <string name="show_add_id">Anna id</string>
-    <string name="admin_lisää_näytös">Lisää näytös</string>
-    <string name="pickDateHint">anna päivämäärä</string>
-    <string name="pickTimeHint">Anna esityksen aika</string>
+    <string name="add_user_text">Sähköposti</string>
+    <string name="add_password_text">Salasana</string>
+    <string name="admin_add_show">Lisää näytös</string>
+    <string name="pickDateHint">Päivämäärä</string>
+    <string name="pickTimeHint">Esityksen aika</string>
+    <string name="time_picker_title">Valitse kellonaika</string>
+    <string name="fill_all_fields">Kaikki kentät ovat pakollisia</string>
+    <string name="show_added">Näytös lisätty</string>
+    <string name="show_removed">Näytös poistettu</string>
+    <string name="remove_show">Poista näytös</string>
+    <string name="add_show">Lisää näytös</string>
+    <string name="dont_remove_admin">Ylläpitäjää ei voi poistaa</string>
 </resources>
