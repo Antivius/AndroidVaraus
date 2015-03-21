@@ -1,13 +1,9 @@
 package com.example.antti.androidvaraus;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.AssetManager;
 import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.util.Pair;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,23 +11,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.entity.BufferedHttpEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -39,9 +21,9 @@ import java.util.ArrayList;
 public class AddMovieActivity extends ActionBarActivity {
 
     private EditText addMovieTextView;
-    private String MOVIE_URL = "http://woodcomb.aleksib.fi/files/elokuvat.txt";
+    private static final String MOVIE_URL = "http://woodcomb.aleksib.fi/files/elokuvat.txt";
     ArrayList<String> movies;
-
+    ArrayAdapter<String> movieAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,19 +31,16 @@ public class AddMovieActivity extends ActionBarActivity {
         setContentView(R.layout.activity_add_movie);
         addMovieTextView = (EditText) findViewById(R.id.add_movie_text);
 
+        final Spinner spinner = (Spinner) findViewById(R.id.admin_delete_movie_spinner);
+        movieAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
+        movieAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(movieAdapter);
+
         Button aButton = (Button) findViewById(R.id.addMovieButton);
         aButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addMovie(findViewById(R.id.manageMoviesButton));
-            }
-        });
-
-        Button testButton = (Button) findViewById(R.id.testButton);
-        testButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                testiNappi(findViewById(R.id.manageMoviesButton));
+                addMovie();
             }
         });
 
@@ -69,178 +48,40 @@ public class AddMovieActivity extends ActionBarActivity {
         deleteButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                deleteMovie(v);
+                deleteMovie(spinner);
             }
         });
 
-        Spinner spinner = (Spinner) findViewById(R.id.admin_delete_movie_spinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-
         try {
-            // Start a background task to download the available movies
-            new DownloadTask().execute(new Pair<>(new URL(MOVIE_URL), adapter));
+            new DownloadTask().execute(new URL(MOVIE_URL));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
-        //lukutesti = Network.download(elokuvat);
-        /**
-         try {
-
-         AssetManager am = getAssets();
-         BufferedReader in = null;
-         in = new BufferedReader(new InputStreamReader(am.open("elokuvat.txt")));
-         String line;
-         while((line = in.readLine()) != null){
-         arrayList.add(line);
-         }
-         } catch (IOException e) {
-         e.printStackTrace();
-         }
-         */
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-
-
     }
 
-    private void addMovie(View view) {
+    private void addMovie() {
         String movieName = addMovieTextView.getText().toString();
              if(movieName != null && !movieName.isEmpty()) {
-                    //Network.upload(movieName, "elokuvatesti.txt");
-                    //TODO: Lisää elokuva serverin listalle.
+                 new AddMovieTask().execute(movieName);
 
-                    /**
-                    *Ilmoitus lisäyksestä
-                    */
-                    Context context = getApplicationContext();
-                    CharSequence text = "Lisätty: " + movieName;
-                    int duration = Toast.LENGTH_SHORT;
-                    Toast toast = Toast.makeText(context, text, duration);
-                    toast.show();
-
-                 /**
-                  * Päivitä spinneri
+                 /*
+                  * Ilmoitus lisäyksestä
                   */
-
-                    Spinner spinner = (Spinner) findViewById(R.id.admin_delete_movie_spinner);
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-
-                     try {
-                      // Start a background task to download the available movies
-                        new DownloadTask().execute(new Pair<>(new URL(MOVIE_URL), adapter));
-                      } catch (MalformedURLException e) {
-                        e.printStackTrace();
-                      }
-
-                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                 spinner.setAdapter(adapter);
-
-                 TextView tv = (TextView) findViewById(R.id.textView1);
-                 tv.setText(movieName);
-
-
+                 Context context = getApplicationContext();
+                 CharSequence text = "Lisätty: " + movieName;
+                 int duration = Toast.LENGTH_SHORT;
+                 Toast toast = Toast.makeText(context, text, duration);
+                 toast.show();
              }
-
-
     }
 
-    private void deleteMovie(View view){
-        Spinner spinner = (Spinner) findViewById(R.id.admin_delete_movie_spinner);
+    private void deleteMovie(Spinner spinner){
         String movie = spinner.getSelectedItem().toString();
-        ArrayList<String> arrayList = new ArrayList<String>();
+        new DeleteMovieTask().execute(movie);
 
-        //TODO: hae lista, tee uusi lista ja vertaile poistettavaan, lähetä uusi lista takaisin
-
-        try {
-
-            AssetManager am = getAssets();
-            BufferedReader in = null;
-            in = new BufferedReader(new InputStreamReader(am.open("elokuvat.txt")));
-            String line;
-            while((line = in.readLine()) != null){
-                if(!line.equals(movie)){
-                    arrayList.add(line);
-                }
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Context context = getApplicationContext();
-        CharSequence text = movie;
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
+        Toast toast = Toast.makeText(getApplicationContext(), movie, Toast.LENGTH_SHORT);
         toast.show();
-        TextView tv = (TextView) findViewById(R.id.textView1);
-        tv.setText(arrayList.toString());
     }
-
-
-
-
-
-
-    private void testiNappi(View view){
-
-        /**
-        new Thread() {
-            @Override
-            public void run() {
-                HttpGet httppost = new HttpGet("http://woodcomb.aleksib.fi/files/elokuvat.txt");
-                HttpResponse response = null;
-                try {
-                    response = httpclient.execute(httppost);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                HttpEntity ht = response.getEntity();
-
-                BufferedHttpEntity buf = null;
-                try {
-                    buf = new BufferedHttpEntity(ht);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                InputStream is = null;
-                try {
-                    is = buf.getContent();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
-
-                BufferedReader r = new BufferedReader(new InputStreamReader(is));
-
-                StringBuilder total = new StringBuilder();
-                String line;
-                try {
-                    while ((line = r.readLine()) != null) {
-                        elista.add(line);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }.start();
-
-         */
-    /**
-        Context context = getApplicationContext();
-        CharSequence text = lukutesti;
-        int duration = Toast.LENGTH_LONG;
-
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-
-     */
-    }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -264,35 +105,78 @@ public class AddMovieActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class DownloadTask extends AsyncTask<Pair<URL, ArrayAdapter<String>>, Void, ArrayAdapter<String>> {
+    private class DownloadTask extends AsyncTask<URL, Void, Void> {
 
         /**
          * Downloads and parses movie list. Modifies the 'movies' field.
-         * @param pairs URL where movie info is found and
-         *              ArrayAdapter which is used to forward the information to the UI
+         * @param urls URL where movie info is found and
          * @return Returns the Adapter to be used later
          */
-        protected ArrayAdapter<String> doInBackground(Pair<URL, ArrayAdapter<String>>... pairs) {
+        protected Void doInBackground(URL... urls) {
             movies = new ArrayList<>();
-            if (pairs.length != 1) {
+            if (urls.length != 1) {
                 return null;
             }
 
-            String moviesFile = Network.download(pairs[0].first);
+            String moviesFile = Network.download(urls[0]);
             for (String movie : moviesFile.split("\n")) {
                 if (movie.length() > 0) {
                     movies.add(movie);
                 }
             }
 
-            return pairs[0].second;
+            return null;
         }
 
-        protected void onPostExecute(ArrayAdapter<String> adapter) {
-            adapter.addAll(movies);
+        protected void onPostExecute(Void _) {
+            movieAdapter.addAll(movies);
         }
     }
 
+    private class AddMovieTask extends AsyncTask<String, Void, String> {
+        protected String doInBackground(String... strings) {
+            if (strings.length != 1) {
+                return null;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (String movie : movies) {
+                sb.append(movie);
+                sb.append("\n");
+            }
+
+            sb.append(strings[0]);
+            Network.upload(sb.toString(), "elokuvat.txt");
+            return strings[0];
+        }
+
+        protected void onPostExecute(String movieName) {
+            movies.add(movieName);
+            movieAdapter.add(movieName);
+        }
+    }
+
+    private class DeleteMovieTask extends AsyncTask<String, Void, String> {
+        protected String doInBackground(String... strings) {
+            if (strings.length != 1) {
+                return null;
+            }
+
+            movies.remove(strings[0]);
+            StringBuilder sb = new StringBuilder();
+            for (String movie : movies) {
+                sb.append(movie);
+                sb.append("\n");
+            }
+
+            Network.upload(sb.toString(), "elokuvat.txt");
+            return strings[0];
+        }
+
+        protected void onPostExecute(String movieName) {
+            movieAdapter.remove(movieName);
+        }
+    }
 }
 
 
