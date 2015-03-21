@@ -66,18 +66,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/valitseElokuva" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/admin_add_show"
+                android:text="@string/admin_lisää_näytös"
+                 />
         </TableRow>
 
         <TableRow
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
 
+            <Spinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/showSpinner"
+                android:layout_column="0" />
+
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/admin_lisää_näytös"
-                android:text="@string/admin_lisää_näytös"
-                 />
+                android:text="@string/removeShow"
+                android:id="@+id/removeShow" />
         </TableRow>
+
     </TableLayout>
 </ScrollView>
