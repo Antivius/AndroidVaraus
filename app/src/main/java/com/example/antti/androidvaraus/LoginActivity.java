@@ -92,7 +92,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mProgressView = findViewById(R.id.login_progress);
     }
 
-    private void openMain(View view){
+    private void openMain(){
         Intent intent = new Intent(this, MainActivity.class);
         EditText editText = (EditText) findViewById(R.id.email);
         String message = editText.getText().toString();
@@ -101,7 +101,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         startActivity(intent);
     }
 
-    private void openAdmin(View view){
+    private void openAdmin(){
         Intent intent = new Intent(this,AdminActivity.class);
         startActivity(intent);
     }
@@ -210,12 +210,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@") && !email.contains(":");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 4;
     }
 
@@ -350,11 +348,11 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
             if (success) {
                 if(mEmail.equals(admin)){
-                    openAdmin(findViewById(R.id.email_sign_in_button));
+                    openAdmin();
                     finish();
                 }
                 else{
-                    openMain(findViewById(R.id.email_sign_in_button));
+                    openMain();
                     finish();
                 }
 
@@ -412,8 +410,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             if (success) {
                 attemptLogin();
             } else {
-                mPasswordView.setError(getString(R.string.error_username_in_use));
-                mPasswordView.requestFocus();
+                mEmailView.setError(getString(R.string.error_username_in_use));
+                mEmailView.requestFocus();
             }
         }
 
