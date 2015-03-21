@@ -27,4 +27,8 @@
     <string name="mangeMoviesButton">Hallitse elokuvia</string>
     <string name="a_manageUsers">Hallitse käyttäjiä</string>
     <string name="add_user_text">Lisää käyttäjä XX@XX:salasana</string>
+    <string name="show_add_id">Anna id</string>
+    <string name="admin_lisää_näytös">Lisää näytös</string>
+    <string name="pickDateHint">anna päivämäärä</string>
+    <string name="pickTimeHint">Anna esityksen aika</string>
 </resources>
