@@ -1,10 +1,9 @@
 package com.example.antti.androidvaraus;
 
 import android.content.Context;
-import android.content.res.AssetManager;
-import android.support.v7.app.ActionBarActivity;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Pair;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,154 +13,112 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class AddUserActivity extends ActionBarActivity {
 
-    private EditText add_user_text;
-    private String USER_URL = "http://woodcomb.aleksib.fi/files/usrnamepw.txt";
+    private EditText addUserText;
+    private EditText addPasswordText;
+    private ArrayAdapter<String> deleteAdapter;
+    private static final String USER_URL = "http://woodcomb.aleksib.fi/files/usrnamepw.txt";
+    private static final String RESERV_URL = "http://woodcomb.aleksib.fi/files/varaukset.txt";
+    private Map<String, String> users;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_user);
 
-        add_user_text = (EditText) findViewById(R.id.add_user_text);
+        addUserText = (EditText) findViewById(R.id.add_user_text);
+        addPasswordText = (EditText) findViewById(R.id.add_password_text);
 
         Button addUserButton = (Button) findViewById(R.id.addUserButton);
         addUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addUser(findViewById(R.id.addUserButton));
+                addUser();
             }
         });
+
+        final Spinner spinner = (Spinner) findViewById(R.id.admin_delete_user_spinner);
+        deleteAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
+        deleteAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(deleteAdapter);
 
         Button deleteUserButton = (Button) findViewById(R.id.deleteUserButton);
-        deleteUserButton.setOnClickListener(new View.OnClickListener(){
+        deleteUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
-                deleteUser(v);
+            public void onClick(View v) {
+                deleteUser(spinner);
             }
         });
 
-        //TODO: hae käyttäjälista verkosta. Ei admin?
-        Spinner spinner = (Spinner) findViewById(R.id.admin_delete_user_spinner);
-        ArrayList<String> arrayList = new ArrayList<String>();
         try {
-
-            AssetManager am = getAssets();
-            BufferedReader in = null;
-            in = new BufferedReader(new InputStreamReader(am.open("usrnamepw.txt")));
-            String line;
-            while((line = in.readLine()) != null){
-                arrayList.add(line);
-            }
-        } catch (IOException e) {
+            new GetUsersTask().execute(new URL(USER_URL));
+        } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, arrayList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
     }
 
 
-    private void addUser(View view){
-        String user = add_user_text.getText().toString();
-        String[] check = user.split(":");
+    private void addUser() {
+        String email = addUserText.getText().toString();
+        String password = addPasswordText.getText().toString();
 
-        /**
-        int pituus = check.length;
-        Context context = getApplicationContext();
-        String message = Integer.toString(pituus);
-        CharSequence text = message;
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-         */
-
-        if((check.length == 1) || (check.length > 2)){
-            Context context = getApplicationContext();
-            CharSequence text = "Erota käyttäjänimi ja salasan";
-            int duration = Toast.LENGTH_SHORT;
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
-
-            return;
-        }
-        if(check[0].contains("@")){
-            if(check[1].length()>4){
-                //TODO: lisää user usrnamepw.txt
-                Context context = getApplicationContext();
-                CharSequence text = "Lisätty:"+ user;
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
-            }
-            else {
-                Context context = getApplicationContext();
-                CharSequence text = "salasana on liian lyhyt";
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
-            }
-        }
-        else {
-            Context context = getApplicationContext();
-            CharSequence text = "@ merkki vaaditaan";
-            int duration = Toast.LENGTH_SHORT;
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
-        }
-
-    }
-
-    private void deleteUser(View view){
-        Spinner spinner = (Spinner) findViewById(R.id.admin_delete_user_spinner);
-        String user = spinner.getSelectedItem().toString();
-
-        if(user.equals("admin@admin:admin")){
-            Context context = getApplicationContext();
-            CharSequence text = "ylläpitäjää ei voi poistaa";
-            int duration = Toast.LENGTH_SHORT;
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
-            return;
-        }
-        ArrayList<String> arrayList = new ArrayList<String>();
-
-        //TODO: hae lista, tee uusi lista ja vertaile poistettavaan, lähetä uusi lista takaisin
-
-        try {
-
-            AssetManager am = getAssets();
-            BufferedReader in = null;
-            in = new BufferedReader(new InputStreamReader(am.open("usrnamepw.txt")));
-            String line;
-            while((line = in.readLine()) != null){
-                if(!line.equals(user)){
-                    arrayList.add(line);
+        if (email.contains("@") && !email.contains(":")) {
+            if (password.length() > 4) {
+                for (String user : users.keySet()) {
+                    if (user.equals(email)) {
+                        addUserText.setError(getString(R.string.error_username_in_use));
+                        return;
+                    }
                 }
 
+                users.put(email, email + ":" + password);
+                new UpdateUsersTask().execute();
+                String text = email + " lisätty";
+                Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
+                toast.show();
+
+                deleteAdapter.add(email);
+                addPasswordText.setText("");
+                addUserText.setText("");
+                addUserText.requestFocus();
+            } else {
+                addPasswordText.setError(getString(R.string.error_invalid_password));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } else {
+            if (password.length() <= 4) {
+                addPasswordText.setError(getString(R.string.error_invalid_password));
+            }
+            addUserText.setError(getString(R.string.error_invalid_email));
         }
 
-        Context context = getApplicationContext();
-        CharSequence text = "Poistettu: "+user;
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
+    }
+
+    private void deleteUser(Spinner spinner) {
+        String user = spinner.getSelectedItem().toString();
+
+        if (user.equals("admin@admin:admin")) {
+            Context context = getApplicationContext();
+            Toast toast = Toast.makeText(context, R.string.dont_remove_admin, Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
+
+        users.remove(user);
+        deleteAdapter.remove(user);
+        new UpdateUsersTask().execute();
+        new UpdateReservTask().execute(user);
+
+        String text = user + " poistettu";
+        Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
         toast.show();
-}
-
-
+    }
 
 
     @Override
@@ -184,5 +141,65 @@ public class AddUserActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private class GetUsersTask extends AsyncTask<URL, Void, Void> {
+        protected Void doInBackground(URL... urls) {
+            users = new HashMap<>();
+            if (urls.length != 1) {
+                return null;
+            }
+
+            String usersFile = Network.download(urls[0]);
+            for (String user : usersFile.split("\n")) {
+                if (user.length() > 0 && !user.equals("admin@admin:admin")) {
+                    users.put(user.split(":", 2)[0], user);
+                }
+            }
+
+            return null;
+        }
+
+        protected void onPostExecute(Void _) {
+            deleteAdapter.addAll(users.keySet());
+        }
+    }
+
+    private class UpdateUsersTask extends AsyncTask<Void, Void, Void> {
+        protected Void doInBackground(Void... _) {
+            StringBuilder sb = new StringBuilder("admin@admin:admin\n");
+            for (String user : users.values()) {
+                sb.append(user);
+                sb.append("\n");
+            }
+
+            Network.upload(sb.toString(), "usrnamepw.txt");
+            return null;
+        }
+    }
+
+    private class UpdateReservTask extends AsyncTask<String, Void, Void> {
+        protected Void doInBackground(String... strings) {
+            if (strings.length != 1) {
+                return null;
+            }
+
+            try {
+                String reservations = Network.download(new URL(RESERV_URL));
+                StringBuilder sb = new StringBuilder(reservations.length());
+                for (String line : reservations.split("\n")) {
+                    String reservationShowId = line.split(":", 3)[1];
+                    if (!reservationShowId.equals(strings[0])) {
+                        sb.append(line);
+                        sb.append("\n");
+                    }
+                }
+
+                Network.upload(sb.toString(), "varaukset.txt");
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 }
