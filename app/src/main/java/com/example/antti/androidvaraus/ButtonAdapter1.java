@@ -8,7 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridLayout;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -19,11 +18,11 @@ import java.util.ArrayList;
  */
 public class ButtonAdapter1 extends BaseAdapter{
     private Context mContext;
-    private ArrayList<String> varaukset;
+    private ArrayList<String> reservations;
 
-    public ButtonAdapter1(Context c, ArrayList<String> varaukset) {
+    public ButtonAdapter1(Context c, ArrayList<String> reservations) {
         mContext = c;
-        this.varaukset = varaukset;
+        this.reservations = reservations;
     }
 
     public int getCount() {
@@ -45,7 +44,6 @@ public class ButtonAdapter1 extends BaseAdapter{
         if (convertView == null) {
 
             // if it's not recycled, initialize some attributes
-
             button = new Button(mContext);
             button.setLayoutParams(new GridLayout.LayoutParams());
             button.setPadding(8, 8, 8, 8);
@@ -53,7 +51,6 @@ public class ButtonAdapter1 extends BaseAdapter{
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
                     button.setBackgroundColor(Color.YELLOW);
                     button.setClickable(false);
 
@@ -63,15 +60,13 @@ public class ButtonAdapter1 extends BaseAdapter{
                         osw.write (pos);
                         osw.flush();
                         osw.close();
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
                     } catch (IOException e){
                         e.printStackTrace();
                     }
                 }
             });
 
-            for(String s : varaukset){
+            for(String s : reservations){
                 if(s.equals(Integer.toString(position + 1))){
                     button.setBackgroundColor(Color.RED);
                     button.setClickable(false);
