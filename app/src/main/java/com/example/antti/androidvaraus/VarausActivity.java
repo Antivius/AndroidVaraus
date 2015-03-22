@@ -5,8 +5,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Pair;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -20,9 +18,7 @@ import java.util.Map;
 
 
 public class VarausActivity extends ActionBarActivity {
-
     public final static String EXTRA_MESSAGE3 = "com.example.antti.androidvaraus.MESSAGE3";
-    private static final String NAYTOS_URL = "http://woodcomb.aleksib.fi/files/naytokset.txt";
     private String elokuva;
     private String kayttaja;
     private Map<String, String> naytokset;
@@ -36,18 +32,17 @@ public class VarausActivity extends ActionBarActivity {
         kayttaja = osat[0];
         elokuva = osat[1];
         TextView naytos = (TextView) findViewById(R.id.naytos_teksti);
-        final TextView nappulaPainettu = (TextView) findViewById(R.id.nappula_painettu);
         if(elokuva.equals("Kaikki")){
             naytos.setText("Kaikki näytökset");
         }else {
-            naytos.setText("Elokuvan " + elokuva + " näytökset");
+            naytos.setText(elokuva + " näytökset");
         }
 
         final ListView naytoslista = (ListView) findViewById(R.id.naytokset);
-        ArrayAdapter<String> listadapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        ArrayAdapter<String> listadapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         naytoslista.setAdapter(listadapter);
         try {
-            new NaytosTask().execute(new Pair<>(new URL(NAYTOS_URL), listadapter));
+            new NaytosTask().execute(new Pair<>(new URL(Network.SHOW_URL), listadapter));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -55,7 +50,6 @@ public class VarausActivity extends ActionBarActivity {
         naytoslista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                nappulaPainettu.setText("Nappula painettu!");
                 Object listItem = naytoslista.getItemAtPosition(position);
                 String s = listItem.toString();
                 String viesti = kayttaja + ":" + naytokset.get(s);
@@ -69,7 +63,8 @@ public class VarausActivity extends ActionBarActivity {
     }
 
     private class NaytosTask extends AsyncTask<Pair<URL, ArrayAdapter<String>>, Void, ArrayAdapter<String>> {
-        protected ArrayAdapter<String> doInBackground(Pair<URL, ArrayAdapter<String>>... pairs) {
+        @SafeVarargs
+        protected final ArrayAdapter<String> doInBackground(Pair<URL, ArrayAdapter<String>>... pairs) {
             naytokset = new HashMap<>();
 
             if (pairs.length != 1) {
@@ -98,27 +93,5 @@ public class VarausActivity extends ActionBarActivity {
         protected void onPostExecute(ArrayAdapter<String> adapter) {
             adapter.addAll(naytokset.keySet());
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_varaus, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

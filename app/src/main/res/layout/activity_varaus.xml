@@ -1,32 +1,21 @@
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.antti.androidvaraus.VarausActivity"
-    android:columnCount="1">
+    android:orientation="vertical"
+    tools:context="com.example.antti.androidvaraus.VarausActivity">
 
     <TextView
         android:id="@+id/naytos_teksti"
-        android:text="Näytökset"
-        android:textSize="32dip"
-        android:layout_gravity="center_horizontal" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:orientation="horizontal">
-
-        <ListView
-            android:layout_width="wrap_content"
-            android:layout_height="389dp"
-            android:id="@+id/naytokset" />
-    </LinearLayout>
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ei painettu nappulaa"
-        android:id="@+id/nappula_painettu"
-        android:layout_row="2"
-        android:layout_column="0" />
+        android:layout_gravity="center_horizontal"
+        android:text="Näytökset"
+        android:textSize="26sp" />
 
+    <ListView
+        android:id="@+id/naytokset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
-</GridLayout>
+</LinearLayout>
