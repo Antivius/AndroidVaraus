@@ -4,8 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -20,12 +18,9 @@ import java.util.Map;
 
 
 public class AddUserActivity extends ActionBarActivity {
-
     private EditText addUserText;
     private EditText addPasswordText;
     private ArrayAdapter<String> deleteAdapter;
-    private static final String USER_URL = "http://woodcomb.aleksib.fi/files/usrnamepw.txt";
-    private static final String RESERV_URL = "http://woodcomb.aleksib.fi/files/varaukset.txt";
     private Map<String, String> users;
 
     @Override
@@ -58,7 +53,7 @@ public class AddUserActivity extends ActionBarActivity {
         });
 
         try {
-            new GetUsersTask().execute(new URL(USER_URL));
+            new GetUsersTask().execute(new URL(Network.USERS_URL));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -71,11 +66,10 @@ public class AddUserActivity extends ActionBarActivity {
 
         if (email.contains("@") && !email.contains(":")) {
             if (password.length() > 4) {
-                for (String user : users.keySet()) {
-                    if (user.equals(email)) {
-                        addUserText.setError(getString(R.string.error_username_in_use));
-                        return;
-                    }
+                if (users.keySet().contains(email)) {
+                    addUserText.setError(getString(R.string.error_username_in_use));
+                    addUserText.requestFocus();
+                    return;
                 }
 
                 users.put(email, email + ":" + password);
@@ -90,12 +84,14 @@ public class AddUserActivity extends ActionBarActivity {
                 addUserText.requestFocus();
             } else {
                 addPasswordText.setError(getString(R.string.error_invalid_password));
+                addPasswordText.requestFocus();
             }
         } else {
             if (password.length() <= 4) {
                 addPasswordText.setError(getString(R.string.error_invalid_password));
             }
             addUserText.setError(getString(R.string.error_invalid_email));
+            addUserText.requestFocus();
         }
 
     }
@@ -118,29 +114,6 @@ public class AddUserActivity extends ActionBarActivity {
         String text = user + " poistettu";
         Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
         toast.show();
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_add_user, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private class GetUsersTask extends AsyncTask<URL, Void, Void> {
@@ -185,7 +158,7 @@ public class AddUserActivity extends ActionBarActivity {
             }
 
             try {
-                String reservations = Network.download(new URL(RESERV_URL));
+                String reservations = Network.download(new URL(Network.RESERV_URL));
                 StringBuilder sb = new StringBuilder(reservations.length());
                 for (String line : reservations.split("\n")) {
                     String reservationShowId = line.split(":", 3)[1];
