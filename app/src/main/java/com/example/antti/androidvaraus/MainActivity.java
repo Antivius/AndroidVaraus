@@ -6,8 +6,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Pair;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -20,19 +18,16 @@ import java.util.ArrayList;
 
 
 public class MainActivity extends ActionBarActivity {
-
-    public final static String EXTRA_MESSAGE2 = "com.example.antti.androidvaraus.MESSAGE";
-    public static final String NIMI = "nimi";
-    private String nimi;
+    public final static String EXTRA_MESSAGE = "com.example.antti.androidvaraus.MESSAGE";
+    public static final String EMAIL = "Email";
     private String email;
-
-    private static final String MOVIE_URL = "http://woodcomb.aleksib.fi/files/elokuvat.txt";
     ArrayList<String> movies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        String name = null;
 
         if (!isTaskRoot()) {
             Intent intent = getIntent();
@@ -43,62 +38,63 @@ public class MainActivity extends ActionBarActivity {
             }
         }
 
+        // Tervetuloteksti
         Intent intent = getIntent();
-        email = intent.getStringExtra(LoginActivity.EXTRA_MESSAGE1);
+        email = intent.getStringExtra(LoginActivity.EXTRA_MESSAGE);
         if(email == null){
             SharedPreferences settings = getPreferences(MODE_PRIVATE);
-            email = settings.getString("Email", null);
+            email = settings.getString(EMAIL, null);
 
             if (email == null) {
-                openLogin(null);
+                openLogin();
             } else {
-                nimi = email.split("@")[0];
+                name = email.split("@")[0];
             }
         } else {
-            nimi = email.split("@")[0];
+            name = email.split("@")[0];
         }
 
         TextView textView = (TextView) findViewById(R.id.tervetuloa);
-        textView.setText("Hei " + nimi + "!");
+        textView.setText("Hei " + name + "!");
 
+        // Elokuvaspinneri
         Spinner spinner = (Spinner) findViewById(R.id.esitykset);
-
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
         try {
-            // Start a background task to download the available movies
-            new DownloadTask().execute(new Pair<>(new URL(MOVIE_URL), adapter));
+            new DownloadTask().execute(new Pair<>(new URL(Network.MOVIE_URL), adapter));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
+        // Napit
         Button logout = (Button) findViewById(R.id.logout);
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openLogin(v);
+                openLogin();
             }
         });
 
-        Button varaa = (Button) findViewById(R.id.varaus_button);
-        varaa.setOnClickListener(new View.OnClickListener() {
+        Button reserveButton = (Button) findViewById(R.id.varaus_button);
+        reserveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openVaraus(v);
+                openVaraus();
             }
         });
 
-        Button omatVaraukset = (Button) findViewById(R.id.omatVaraukset);
-        omatVaraukset.setOnClickListener(new View.OnClickListener() {
+        Button ownReservationsButton = (Button) findViewById(R.id.omatVaraukset);
+        ownReservationsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openOmatVaraukset(v);
+                openOmatVaraukset();
             }
         });
     }
 
-    private void openLogin(View view){
+    private void openLogin(){
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
@@ -109,53 +105,29 @@ public class MainActivity extends ActionBarActivity {
 
         SharedPreferences settings = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor ed = settings.edit();
-        ed.putString("Email", email);
+        ed.putString(EMAIL, email);
         ed.apply();
     }
 
-    private void openVaraus(View view){
+    private void openVaraus(){
         Intent intent = new Intent(this, VarausActivity.class);
         Spinner spinner = (Spinner) findViewById(R.id.esitykset);
         String message = spinner.getSelectedItem().toString();
         message = email + ":" + message;
-        intent.putExtra(EXTRA_MESSAGE2, message);
+        intent.putExtra(EXTRA_MESSAGE, message);
         startActivity(intent);
     }
 
-    private void openOmatVaraukset(View view){
+    private void openOmatVaraukset(){
         Intent intent = new Intent(this, OmatVarauksetActivity.class);
-        intent.putExtra(EXTRA_MESSAGE2, email);
+        intent.putExtra(EXTRA_MESSAGE, email);
         startActivity(intent);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState){
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putString(NIMI, nimi);
-
+        savedInstanceState.putString(EMAIL, email);
     }
 
     @Override
@@ -163,22 +135,17 @@ public class MainActivity extends ActionBarActivity {
         super.onRestart();
     }
 
-    /**
-     * Downloads movie information from a server in the background.
-     */
-    private class DownloadTask extends AsyncTask<Pair<URL, ArrayAdapter<String>>, Void, ArrayAdapter<String>> {
+    private class DownloadTask extends AsyncTask<Pair<URL, ArrayAdapter<String>>, Void, Void> {
+        private ArrayAdapter<String> adapter;
 
-        /**
-         * Downloads and parses movie list. Modifies the 'movies' field.
-         * @param pairs URL where movie info is found and
-         *              ArrayAdapter which is used to forward the information to the UI
-         * @return Returns the Adapter to be used later
-         */
-        protected ArrayAdapter<String> doInBackground(Pair<URL, ArrayAdapter<String>>... pairs) {
+        @SafeVarargs
+        protected final Void doInBackground(Pair<URL, ArrayAdapter<String>>... pairs) {
             movies = new ArrayList<>();
             if (pairs.length != 1) {
                 return null;
             }
+
+            adapter = pairs[0].second;
 
             String moviesFile = Network.download(pairs[0].first);
             for (String movie : moviesFile.split("\n")) {
@@ -187,10 +154,10 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
 
-            return pairs[0].second;
+            return null;
         }
 
-        protected void onPostExecute(ArrayAdapter<String> adapter) {
+        protected void onPostExecute(Void _) {
             adapter.addAll(movies);
         }
     }

@@ -32,7 +32,7 @@ public class VarausActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_varaus);
         Intent intent = getIntent();
-        String[] osat = intent.getStringExtra(MainActivity.EXTRA_MESSAGE2).split(":", 2);
+        String[] osat = intent.getStringExtra(MainActivity.EXTRA_MESSAGE).split(":", 2);
         kayttaja = osat[0];
         elokuva = osat[1];
         TextView naytos = (TextView) findViewById(R.id.naytos_teksti);
@@ -47,7 +47,6 @@ public class VarausActivity extends ActionBarActivity {
         ArrayAdapter<String> listadapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
         naytoslista.setAdapter(listadapter);
         try {
-            // Start a background task to download the available movies
             new NaytosTask().execute(new Pair<>(new URL(NAYTOS_URL), listadapter));
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -87,7 +86,7 @@ public class VarausActivity extends ActionBarActivity {
                     naytokset.put(naytos, line);
                 } else {
                     if (osat[5].equals(elokuva)) {
-                        String naytos = osat[3] + " " + osat[4] + " " + osat[5] + " " + osat[1] + " " + osat[2];
+                        String naytos = osat[3] + " " + osat[4] + " " + osat[1] + " " + osat[2];
                         naytokset.put(naytos, line);
                     }
                 }

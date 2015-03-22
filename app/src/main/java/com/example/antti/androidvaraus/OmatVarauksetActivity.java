@@ -35,7 +35,7 @@ public class OmatVarauksetActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_omat_varaukset);
         Intent intent = getIntent();
-        email = intent.getStringExtra(MainActivity.EXTRA_MESSAGE2);
+        email = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
 
         final ListView listView = (ListView) findViewById(R.id.varaukset);
         final TextView poistettavaVaraus = (TextView) findViewById(R.id.poistettavaVaraus);
@@ -119,7 +119,7 @@ public class OmatVarauksetActivity extends ActionBarActivity {
         adapter.remove(varaus);
         varaukset.remove(varaus);
         new PoistaVarausTask().execute(varausRivi);
-        Toast.makeText(this, R.string.varaus_peruttu, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.reservation_cancelled, Toast.LENGTH_SHORT).show();
     }
 
     private class PoistaVarausTask extends AsyncTask<String, Void, Void> {

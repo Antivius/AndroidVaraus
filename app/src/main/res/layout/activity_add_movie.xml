@@ -42,7 +42,7 @@ android:layout_height="match_parent">
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/deleteMovieButton"
-            android:text="@string/deleteUserButton"
+            android:text="@string/delete_user_button"
             android:layout_column="2" />
     </TableRow>
 </TableLayout>

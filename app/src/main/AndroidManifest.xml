@@ -26,7 +26,7 @@
         </activity>
         <activity
             android:name=".VarausActivity"
-            android:label="@string/title_activity_varaus"
+            android:label="@string/title_activity_pick_show"
             android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -61,14 +61,6 @@
         <activity
             android:name=".AddShowActivity"
             android:label="@string/title_activity_add_show"
-            android:parentActivityName=".AdminActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.antti.androidvaraus.AdminActivity" />
-        </activity>
-        <activity
-            android:name=".ControlActivity"
-            android:label="@string/title_activity_control"
             android:parentActivityName=".AdminActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
