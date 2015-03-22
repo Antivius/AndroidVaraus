@@ -314,6 +314,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 String userInfo = Network.download(new URL(Network.USERS_URL));
 
                 for (String line : userInfo.split("\n")) {
+                    if (line.isEmpty()) {
+                        continue;
+                    }
                     String[] s = line.split(":");
                     if(s[0].equals(mEmail) && s[1].equals(mPassword)){
                         return true;
@@ -375,6 +378,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             try {
                 userInfo = Network.download(new URL(Network.USERS_URL));
                 for (String line : userInfo.split("\n")) {
+                    if (line.isEmpty()) {
+                        continue;
+                    }
                     String[] s = line.split(":");
                     if(s[0].equals(mEmail)){
                         return false;

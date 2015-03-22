@@ -161,6 +161,9 @@ public class AddUserActivity extends ActionBarActivity {
                 String reservations = Network.download(new URL(Network.RESERV_URL));
                 StringBuilder sb = new StringBuilder(reservations.length());
                 for (String line : reservations.split("\n")) {
+                    if (line.isEmpty()) {
+                        continue;
+                    }
                     String reservationShowId = line.split(":", 3)[1];
                     if (!reservationShowId.equals(strings[0])) {
                         sb.append(line);

@@ -70,10 +70,16 @@ public class OmatVarauksetActivity extends ActionBarActivity {
                 String showFile = Network.download(new URL(Network.SHOW_URL));
 
                 for (String reservLine : reservFile.split("\n")) {
+                    if (reservLine.isEmpty()) {
+                        continue;
+                    }
                     String[] reservation = reservLine.split(":");
                     if (reservation[1].equals(email)) {
                         String showId = reservation[0];
                         for (String showLine : showFile.split("\n")) {
+                            if (showLine.isEmpty()) {
+                                continue;
+                            }
                             String[] show = showLine.split(":", 6);
                             if (show[0].equals(showId)) {
                                 StringBuilder sb = new StringBuilder();
@@ -130,7 +136,7 @@ public class OmatVarauksetActivity extends ActionBarActivity {
                 StringBuilder sb = new StringBuilder(reservFile.length());
 
                 for (String line : reservFile.split("\n")) {
-                    if (!line.equals(strings[0])) {
+                    if (!line.equals(strings[0]) && !line.isEmpty()) {
                         sb.append(line);
                         sb.append("\n");
                     }

@@ -126,6 +126,9 @@ public class PaikkaActivity extends ActionBarActivity {
             try {
                 reservFile = Network.download(new URL(Network.RESERV_URL));
                 for (String line : reservFile.split("\n")) {
+                    if (line.isEmpty()) {
+                        continue;
+                    }
                     String[] reservation = line.split(":");
                     if (reservation[0].equals(showId)) {
                         reservedSeats.addAll(Arrays.asList(reservation).subList(2, reservation.length));

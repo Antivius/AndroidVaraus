@@ -303,7 +303,7 @@ public class AddShowActivity extends ActionBarActivity {
 
             StringBuilder sb = new StringBuilder(showsFile.length());
             for (String line : showsFile.split("\n")) {
-                if (!line.equals(strings[0])) {
+                if (!line.equals(strings[0]) && !line.isEmpty()) {
                     sb.append(line);
                     sb.append("\n");
                 }
@@ -316,6 +316,9 @@ public class AddShowActivity extends ActionBarActivity {
                 String reservations = Network.download(new URL(Network.RESERV_URL));
                 sb = new StringBuilder(reservations.length());
                 for (String line : reservations.split("\n")) {
+                    if (line.isEmpty()) {
+                        continue;
+                    }
                     String reservationShowId = line.split(":", 2)[0];
                     String showId = strings[0].split(":", 2)[0];
                     if (!reservationShowId.equals(showId)) {
