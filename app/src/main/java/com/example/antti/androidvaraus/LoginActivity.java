@@ -32,32 +32,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A login screen that offers login via email/password.
+ * Kirjautumisruutu
  */
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
-
-
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
     private UserLoginTask mAuthTask1 = null;
     private UserRegisterTask mAuthTask2 = null;
 
-    // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-    public final static String EXTRA_MESSAGE1 = "com.example.antti.androidvaraus.MESSAGE";
-
-    private static final String USERINFO_URL = "http://woodcomb.aleksib.fi/files/usrnamepw.txt";
+    public final static String EXTRA_MESSAGE = "com.example.antti.androidvaraus.MESSAGE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Set up the login form.
+        // Kirjautumiskentät
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
 
@@ -73,6 +65,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             }
         });
 
+        // Napit
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -92,20 +85,28 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mProgressView = findViewById(R.id.login_progress);
     }
 
-    private void openMain(){
+    /**
+     * Avaa pääikkunan.
+     */
+    private void openMain(String email){
         Intent intent = new Intent(this, MainActivity.class);
-        EditText editText = (EditText) findViewById(R.id.email);
-        String message = editText.getText().toString();
-        intent.putExtra(EXTRA_MESSAGE1, message);
+        intent.putExtra(EXTRA_MESSAGE, email);
         intent.putExtra("kutsuja", "LoginActivity");
         startActivity(intent);
     }
 
+    /**
+     * Avaa hallintapaneelin.
+     */
     private void openAdmin(){
-        Intent intent = new Intent(this,AdminActivity.class);
+        Intent intent = new Intent(this, AdminActivity.class);
         startActivity(intent);
     }
 
+    /**
+     * Tarkistaa rekisteröintiä varten annetut arvot ja aloittaa UserRegisterTaskin,
+     * jos kaikki on kunnossa.
+     */
     private void register() {
         if (mAuthTask2 != null) {
             return;
@@ -114,7 +115,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mEmailView.setError(null);
         mPasswordView.setError(null);
 
-        // Store values at the time of the register attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
 
@@ -138,12 +138,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
 
         if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
+            // Virheen sattuessa siirrä focus virheelliseen kenttään.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
+            // Näytä latausspinneri ja lähetä tieto uudesta käyttäjästä
             showProgress(true);
             mAuthTask2 = new UserRegisterTask(email, password);
             mAuthTask2.execute((Void) null);
@@ -155,37 +153,30 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         getLoaderManager().initLoader(0, null, this);
     }
 
-
     /**
-     * Attempts to sign in the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
+     * Yrittää kirjautua annetuilla arvoilla. Tarkistaa arvojen perusvaatimukset,
+     * kuten rekisteröinnissä.
      */
     public void attemptLogin() {
         if (mAuthTask1 != null) {
             return;
         }
 
-        // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
 
-        // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
-
-        // Check for a valid password, if the user entered one.
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
         }
 
-        // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
@@ -197,18 +188,19 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
 
         if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
             showProgress(true);
             mAuthTask1 = new UserLoginTask(email, password);
             mAuthTask1.execute((Void) null);
         }
     }
 
+    /**
+     * Yksinkertainen perustesti, onko sähköpostiosoite validi.
+     * @param email testattava sähköposti
+     * @return boolean, onko sähköpostiosoite kunnollinen
+     */
     private boolean isEmailValid(String email) {
         return email.contains("@") && !email.contains(":");
     }
@@ -218,13 +210,11 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     }
 
     /**
-     * Shows the progress UI and hides the login form.
+     * Näytä latausspinneri kirjautumisen sijaan.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
+        // Animoi transitio, jos API >= HONEYCOMB_MR2
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
@@ -246,30 +236,31 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 }
             });
         } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
+            // Muuten vain piilota kirjautuminen ja näytä spinneri
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
+    /**
+     * Hae käyttäjän tallennetut sähköpostiosoitteet.
+     */
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new CursorLoader(this,
-                // Retrieve data rows for the device user's 'profile' contact.
                 Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
                         ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
 
-                // Select only email addresses.
                 ContactsContract.Contacts.Data.MIMETYPE +
                         " = ?", new String[]{ContactsContract.CommonDataKinds.Email
                 .CONTENT_ITEM_TYPE},
 
-                // Show primary email addresses first. Note that there won't be
-                // a primary email address if the user hasn't specified one.
                 ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
     }
 
+    /**
+     * Laita tallennetut sähköpostiosoitteet kenttään automaattista täyttöä varten.
+     */
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         List<String> emails = new ArrayList<>();
@@ -284,7 +275,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
     }
 
     private interface ProfileQuery {
@@ -294,12 +284,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         };
 
         int ADDRESS = 0;
-        int IS_PRIMARY = 1;
     }
 
-
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(LoginActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
@@ -308,11 +295,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     }
 
     /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
+     * Lataa käyttäjätiedot verkosta, ja kirjaudu sisään, jos käyttäjä löytyy.
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
         private final String mEmail;
         private final String mPassword;
         private String admin = "admin@admin";
@@ -326,7 +311,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         protected Boolean doInBackground(Void... params) {
 
             try {
-                String userInfo = Network.download(new URL(USERINFO_URL));
+                String userInfo = Network.download(new URL(Network.USERS_URL));
 
                 for (String line : userInfo.split("\n")) {
                     String[] s = line.split(":");
@@ -352,7 +337,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                     finish();
                 }
                 else{
-                    openMain();
+                    openMain(mEmail);
                     finish();
                 }
 
@@ -367,10 +352,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             mAuthTask1 = null;
             showProgress(false);
         }
-
-
     }
-    //Koska usrnamepw.txt asset-kansiossa ei pysty muokkaamaan sitä --> serverin tynkää pystyyn
+
+    /**
+     * Lataa käyttäjätiedot verkosta, tarkista ettei samaa käyttäjää ole, lähetä uusi
+     * käyttäjälista, joka sisältää uuden käyttäjän, takaisin.
+     */
     public class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mEmail;
@@ -386,7 +373,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             String userInfo;
 
             try {
-                userInfo = Network.download(new URL(USERINFO_URL));
+                userInfo = Network.download(new URL(Network.USERS_URL));
                 for (String line : userInfo.split("\n")) {
                     String[] s = line.split(":");
                     if(s[0].equals(mEmail)){
@@ -398,7 +385,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 return false;
             }
 
-            // Upload the new user information
             return Network.upload(userInfo + "\n" + mEmail + ":" + mPassword, "usrnamepw.txt");
         }
 
@@ -420,7 +406,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             mAuthTask2 = null;
             showProgress(false);
         }
-
     }
 }
 
