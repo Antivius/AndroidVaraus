@@ -5,8 +5,6 @@ import android.app.TimePickerDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -28,19 +26,17 @@ import java.util.Map;
 
 
 public class AddShowActivity extends ActionBarActivity {
-
-    private static final String MOVIE_URL = "http://woodcomb.aleksib.fi/files/elokuvat.txt";
-    private static final String SHOW_URL = "http://woodcomb.aleksib.fi/files/naytokset.txt";
-    private static final String RESERV_URL = "http://woodcomb.aleksib.fi/files/varaukset.txt";
     private EditText pickDate;
     private EditText pickTime;
     private Spinner theaterSpinner;
     private Spinner auditoriumSpinner;
     private Spinner addMovieSpinner;
     private Spinner removeMovieSpinner;
+
     private Calendar myCalendar = Calendar.getInstance();
     private ArrayList<String> movies;
     private ArrayAdapter<String> movieAdapter;
+
     // Map<elokuvan nimi, Map<näytöksen UI-teksti, näytöksen data palvelimella>>
     private Map<String, Map<String, String>> shows;
     private String showsFile;
@@ -50,6 +46,7 @@ public class AddShowActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_show);
+        // Näytöksen lisäys
         pickDate = (EditText) findViewById(R.id.pickDate);
         pickTime = (EditText) findViewById(R.id.pickTime);
 
@@ -129,6 +126,7 @@ public class AddShowActivity extends ActionBarActivity {
             }
         });
 
+        // ****************
         // Näytöksen poisto
         final Spinner showSpinner = (Spinner) findViewById(R.id.admin_delete_show_spinner);
         showAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
@@ -159,8 +157,8 @@ public class AddShowActivity extends ActionBarActivity {
         });
 
         try {
-            new GetMoviesTask().execute(new URL(MOVIE_URL));
-            new GetShowsTask().execute(new URL(SHOW_URL));
+            new GetMoviesTask().execute(new URL(Network.MOVIE_URL));
+            new GetShowsTask().execute(new URL(Network.SHOW_URL));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -207,41 +205,18 @@ public class AddShowActivity extends ActionBarActivity {
     }
 
     private void addTime(){
-        Calendar mcurrentTime = Calendar.getInstance();
-        int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-        int minute = mcurrentTime.get(Calendar.MINUTE);
-        TimePickerDialog mTimePicker;
-        mTimePicker = new TimePickerDialog(AddShowActivity.this, new TimePickerDialog.OnTimeSetListener() {
+        Calendar currentTime = Calendar.getInstance();
+        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+        int minute = currentTime.get(Calendar.MINUTE);
+        TimePickerDialog timePicker;
+        timePicker = new TimePickerDialog(AddShowActivity.this, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
                 pickTime.setText(selectedHour + "." + String.format("%02d", selectedMinute));
             }
         }, hour, minute, true);
-        mTimePicker.setTitle(R.string.time_picker_title);
-        mTimePicker.show();
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_add_show, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        timePicker.setTitle(R.string.time_picker_title);
+        timePicker.show();
     }
 
     private void updateShowAdapter(String movie) {
@@ -259,11 +234,6 @@ public class AddShowActivity extends ActionBarActivity {
     }
 
     private class GetMoviesTask extends AsyncTask<URL, Void, Void> {
-
-        /**
-         * Downloads and parses movie list. Modifies the 'movies' field.
-         * @param urls URL where movie info is found
-         */
         protected Void doInBackground(URL... urls) {
             movies = new ArrayList<>();
             if (urls.length != 1) {
@@ -343,7 +313,7 @@ public class AddShowActivity extends ActionBarActivity {
             Network.upload(showsFile, "naytokset.txt");
             // Poista kaikki näytökseen liittyvät varaukset
             try {
-                String reservations = Network.download(new URL(RESERV_URL));
+                String reservations = Network.download(new URL(Network.RESERV_URL));
                 sb = new StringBuilder(reservations.length());
                 for (String line : reservations.split("\n")) {
                     String reservationShowId = line.split(":", 2)[0];
