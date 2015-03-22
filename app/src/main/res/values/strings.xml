@@ -33,4 +33,5 @@
     <string name="remove_show">Poista näytös</string>
     <string name="add_show">Lisää näytös</string>
     <string name="dont_remove_admin">Ylläpitäjää ei voi poistaa</string>
+    <string name="logout">Logout</string>
 </resources>
