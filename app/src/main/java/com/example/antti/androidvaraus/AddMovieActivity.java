@@ -4,8 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -19,9 +17,7 @@ import java.util.ArrayList;
 
 
 public class AddMovieActivity extends ActionBarActivity {
-
     private EditText addMovieTextView;
-    private static final String MOVIE_URL = "http://woodcomb.aleksib.fi/files/elokuvat.txt";
     ArrayList<String> movies;
     ArrayAdapter<String> movieAdapter;
 
@@ -36,8 +32,8 @@ public class AddMovieActivity extends ActionBarActivity {
         movieAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(movieAdapter);
 
-        Button aButton = (Button) findViewById(R.id.addMovieButton);
-        aButton.setOnClickListener(new View.OnClickListener() {
+        Button addButton = (Button) findViewById(R.id.addMovieButton);
+        addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 addMovie();
@@ -45,15 +41,15 @@ public class AddMovieActivity extends ActionBarActivity {
         });
 
         Button deleteButton = (Button) findViewById(R.id.deleteMovieButton);
-        deleteButton.setOnClickListener(new View.OnClickListener(){
+        deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
                 deleteMovie(spinner);
             }
         });
 
         try {
-            new DownloadTask().execute(new URL(MOVIE_URL));
+            new DownloadTask().execute(new URL(Network.MOVIE_URL));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -61,57 +57,33 @@ public class AddMovieActivity extends ActionBarActivity {
 
     private void addMovie() {
         String movieName = addMovieTextView.getText().toString();
-             if(movieName != null && !movieName.isEmpty()) {
-                 new AddMovieTask().execute(movieName);
+        if (movieName != null && !movieName.isEmpty()) {
+            if (movies.contains(movieName)) {
+                addMovieTextView.setError(getString(R.string.error_movie_name_in_use));
+                addMovieTextView.requestFocus();
+                return;
+            }
+            new AddMovieTask().execute(movieName);
 
-                 /*
-                  * Ilmoitus lisäyksestä
-                  */
-                 Context context = getApplicationContext();
-                 CharSequence text = "Lisätty: " + movieName;
-                 int duration = Toast.LENGTH_SHORT;
-                 Toast toast = Toast.makeText(context, text, duration);
-                 toast.show();
-             }
+            Context context = getApplicationContext();
+            CharSequence text = "Lisätty: " + movieName;
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+            addMovieTextView.setText("");
+        }
     }
 
-    private void deleteMovie(Spinner spinner){
+    private void deleteMovie(Spinner spinner) {
         String movie = spinner.getSelectedItem().toString();
         new DeleteMovieTask().execute(movie);
 
-        Toast toast = Toast.makeText(getApplicationContext(), movie, Toast.LENGTH_SHORT);
+        String message = "Poistettu: " + movie;
+        Toast toast = Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT);
         toast.show();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_add_movie, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     private class DownloadTask extends AsyncTask<URL, Void, Void> {
-
-        /**
-         * Downloads and parses movie list. Modifies the 'movies' field.
-         * @param urls URL where movie info is found and
-         * @return Returns the Adapter to be used later
-         */
         protected Void doInBackground(URL... urls) {
             movies = new ArrayList<>();
             if (urls.length != 1) {

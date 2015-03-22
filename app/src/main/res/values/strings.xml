@@ -34,4 +34,5 @@
     <string name="add_show">Lisää näytös</string>
     <string name="dont_remove_admin">Ylläpitäjää ei voi poistaa</string>
     <string name="logout">Logout</string>
+    <string name="error_movie_name_in_use">Elokuva on jo valikoimassa</string>
 </resources>

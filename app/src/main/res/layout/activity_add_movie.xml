@@ -1,48 +1,48 @@
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <TableRow
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:paddingTop="10dp"
         android:paddingBottom="5dp"
         android:paddingLeft="5dp"
-        android:paddingRight="5dp">
+        android:paddingRight="5dp"
+        android:paddingTop="10dp">
 
-        <EditText android:id="@+id/add_movie_text"
-            android:layout_weight="1"
+        <EditText
+            android:id="@+id/add_movie_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:hint="@string/add_movie_text" />
 
         <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/add_user_button"
-        android:id="@+id/addMovieButton" />
+            android:id="@+id/addMovieButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_user_button" />
     </TableRow>
 
     <TableRow
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:paddingTop="5dp"
         android:paddingLeft="5dp"
-        android:paddingRight="5dp">
+        android:paddingRight="5dp"
+        android:paddingTop="5dp">
 
         <Spinner
-            android:layout_width="wrap_content"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
             android:id="@+id/admin_delete_movie_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:spinnerMode="dropdown" />
 
         <Button
+            android:id="@+id/deleteMovieButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/deleteMovieButton"
-            android:text="@string/delete_user_button"
-            android:layout_column="2" />
+            android:layout_column="2"
+            android:text="@string/delete_user_button" />
     </TableRow>
 </TableLayout>
