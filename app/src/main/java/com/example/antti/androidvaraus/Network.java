@@ -12,6 +12,10 @@ import java.net.URL;
  * Handles networking requests.
  */
 public class Network {
+    public static final String MOVIE_URL = "http://woodcomb.aleksib.fi/files/elokuvat.txt";
+    public static final String SHOW_URL = "http://woodcomb.aleksib.fi/files/naytokset.txt";
+    public static final String RESERV_URL = "http://woodcomb.aleksib.fi/files/varaukset.txt";
+    public static final String USERS_URL = "http://woodcomb.aleksib.fi/files/usrnamepw.txt";
     private static final String UPLOAD_URL = "http://woodcomb.aleksib.fi/up";
 
     private static final String POST_START =
