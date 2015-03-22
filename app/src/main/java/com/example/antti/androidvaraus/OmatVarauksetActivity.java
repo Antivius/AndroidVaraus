@@ -1,13 +1,9 @@
 package com.example.antti.androidvaraus;
 
-import android.app.TaskStackBuilder;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -23,12 +19,8 @@ import java.util.Map;
 
 
 public class OmatVarauksetActivity extends ActionBarActivity {
-
-//    public final static String EXTRA_MESSAGE3 = "com.example.antti.androidvaraus.MESSAGE";
-    private static final String VARAUS_URL = "http://woodcomb.aleksib.fi/files/varaukset.txt";
-    private static final String NAYTOS_URL = "http://woodcomb.aleksib.fi/files/naytokset.txt";
     private String email;
-    private Map<String, String> varaukset;
+    private Map<String, String> reservations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,65 +30,70 @@ public class OmatVarauksetActivity extends ActionBarActivity {
         email = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
 
         final ListView listView = (ListView) findViewById(R.id.varaukset);
-        final TextView poistettavaVaraus = (TextView) findViewById(R.id.poistettavaVaraus);
+        final TextView pendingRemove = (TextView) findViewById(R.id.poistettavaVaraus);
 
-        final ArrayAdapter<String> listadapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-        listView.setAdapter(listadapter);
-        new HaeVarauksetTask().execute(listadapter);
+        final ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        listView.setAdapter(listAdapter);
+        new GetReservTask().execute(listAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Object listItem = listView.getItemAtPosition(position);
-                poistettavaVaraus.setText(listItem.toString());
+                pendingRemove.setText(listItem.toString());
             }
         });
 
-        Button peruVaraus = (Button) findViewById(R.id.peru_varaus_button);
-        peruVaraus.setOnClickListener(new View.OnClickListener() {
+        Button removeButton = (Button) findViewById(R.id.peru_varaus_button);
+        removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                poistaVaraus(poistettavaVaraus, listadapter);
+                removeReservation(pendingRemove, listAdapter);
             }
         });
     }
 
-    private class HaeVarauksetTask extends AsyncTask<ArrayAdapter<String>, Void, ArrayAdapter<String>> {
-        protected ArrayAdapter<String> doInBackground(ArrayAdapter<String>... adapters) {
-            varaukset = new HashMap<>();
+    private class GetReservTask extends AsyncTask<ArrayAdapter<String>, Void, Void> {
+        private ArrayAdapter<String> adapter;
+
+        @SafeVarargs
+        protected final Void doInBackground(ArrayAdapter<String>... adapters) {
+            reservations = new HashMap<>();
 
             if (adapters.length != 1) {
                 return null;
             }
 
-            try {
-                String varausFile = Network.download(new URL(VARAUS_URL));
-                String naytosFile = Network.download(new URL(NAYTOS_URL));
+            adapter = adapters[0];
 
-                for (String varausRivi : varausFile.split("\n")) {
-                    String[] varaus = varausRivi.split(":");
-                    if (varaus[1].equals(email)) {
-                        String naytosId = varaus[0];
-                        for (String naytosRivi : naytosFile.split("\n")) {
-                            String[] naytos = naytosRivi.split(":", 6);
-                            if (naytos[0].equals(naytosId)) {
+            try {
+                String reservFile = Network.download(new URL(Network.RESERV_URL));
+                String showFile = Network.download(new URL(Network.SHOW_URL));
+
+                for (String reservLine : reservFile.split("\n")) {
+                    String[] reservation = reservLine.split(":");
+                    if (reservation[1].equals(email)) {
+                        String showId = reservation[0];
+                        for (String showLine : showFile.split("\n")) {
+                            String[] show = showLine.split(":", 6);
+                            if (show[0].equals(showId)) {
                                 StringBuilder sb = new StringBuilder();
-                                sb.append(naytos[3]); // Pvm
+                                sb.append(show[3]); // Pvm
                                 sb.append(" ");
-                                sb.append(naytos[4]); // Klo
+                                sb.append(show[4]); // Klo
                                 sb.append(" ");
-                                sb.append(naytos[1]); // Teatteri
+                                sb.append(show[1]); // Teatteri
                                 sb.append(" ");
-                                sb.append(naytos[2]); // Sali
+                                sb.append(show[2]); // Sali
                                 sb.append(" ");
-                                sb.append(naytos[5]); // Nimi
+                                sb.append(show[5]); // Nimi
                                 sb.append(" Paikat:");
-                                for(int i = 2; i < varaus.length; i++){
+                                for (int i = 2; i < reservation.length; i++) {
                                     sb.append(" ");
-                                    sb.append(varaus[i]);
+                                    sb.append(reservation[i]);
 
                                 }
 
-                                varaukset.put(sb.toString(), varausRivi);
+                                reservations.put(sb.toString(), reservLine);
                             }
                         }
                     }
@@ -105,36 +102,36 @@ public class OmatVarauksetActivity extends ActionBarActivity {
                 e.printStackTrace();
             }
 
-            return adapters[0];
+            return null;
         }
 
-        protected void onPostExecute(ArrayAdapter<String> adapter) {
-            adapter.addAll(varaukset.keySet());
+        protected void onPostExecute(Void _) {
+            adapter.addAll(reservations.keySet());
         }
     }
 
-    public void poistaVaraus(TextView view, ArrayAdapter<String> adapter) {
-        String varaus = view.getText().toString();
-        String varausRivi = varaukset.get(varaus);
-        adapter.remove(varaus);
-        varaukset.remove(varaus);
-        new PoistaVarausTask().execute(varausRivi);
+    public void removeReservation(TextView view, ArrayAdapter<String> adapter) {
+        String reservation = view.getText().toString();
+        String line = reservations.get(reservation);
+        adapter.remove(reservation);
+        reservations.remove(reservation);
+        new RemoveReservTask().execute(line);
         Toast.makeText(this, R.string.reservation_cancelled, Toast.LENGTH_SHORT).show();
     }
 
-    private class PoistaVarausTask extends AsyncTask<String, Void, Void> {
+    private class RemoveReservTask extends AsyncTask<String, Void, Void> {
         protected Void doInBackground(String... strings) {
             if (strings.length != 1) {
                 return null;
             }
 
             try {
-                String varausFile = Network.download(new URL(VARAUS_URL));
-                StringBuilder sb = new StringBuilder(varausFile.length());
+                String reservFile = Network.download(new URL(Network.RESERV_URL));
+                StringBuilder sb = new StringBuilder(reservFile.length());
 
-                for (String varausRivi : varausFile.split("\n")) {
-                    if (!varausRivi.equals(strings[0])) {
-                        sb.append(varausRivi);
+                for (String line : reservFile.split("\n")) {
+                    if (!line.equals(strings[0])) {
+                        sb.append(line);
                         sb.append("\n");
                     }
                 }
@@ -146,47 +143,5 @@ public class OmatVarauksetActivity extends ActionBarActivity {
 
             return null;
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_omat_varaukset, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-
-
-        switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                Intent upIntent = NavUtils.getParentActivityIntent(this);
-                if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
-                    // This activity is NOT part of this app's task, so create a new task
-                    // when navigating up, with a synthesized back stack.
-                    TaskStackBuilder.create(this)
-                            // Add all of this activity's parents to the back stack
-                            .addNextIntentWithParentStack(upIntent)
-                                    // Navigate up to the closest parent
-                            .startActivities();
-                } else {
-                    // This activity is part of this app's task, so simply
-                    // navigate up to the logical parent activity.
-                    NavUtils.navigateUpTo(this, upIntent);
-                }
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed(){
-        finish();
     }
 }

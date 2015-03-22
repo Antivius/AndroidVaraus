@@ -15,6 +15,7 @@
     <string name="title_activity_omat_varaukset">Varaukset</string>
     <string name="reservation_accepted">Varaus tehty</string>
     <string name="reservation_cancelled">Varaus peruttu</string>
+    <string name="cancel_reservation">Peru varaus</string>
     <string name="add_movie_text">Elokuva</string>
     <string name="add_user_button">Lisää</string>
     <string name="delete_user_button">Poista</string>
