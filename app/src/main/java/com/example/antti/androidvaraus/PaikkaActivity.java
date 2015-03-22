@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
@@ -20,50 +18,42 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 
 public class PaikkaActivity extends ActionBarActivity {
-    private static final String VARAUS_URL = "http://woodcomb.aleksib.fi/files/varaukset.txt";
-    private String varausFile;
-    private String[] naytos;
-    private ArrayList<String> varatutPaikat;
-    private String kayttaja;
-    private Integer[] buttonIdt1;
-    private Integer[] buttonIdt2;
-    private String valinnatTiedosto;
-    private File file;
+    private String reservFile;
+    private String[] show;
+    private ArrayList<String> reservedSeats;
+    private String user;
+    private String pendingReservFile = "valinnat";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         Intent intent = getIntent();
         String[] s = intent.getStringExtra(VarausActivity.EXTRA_MESSAGE3).split(":", 2);
-        kayttaja = s[0];
-        naytos = s[1].split(":", 6);
+        user = s[0];
+        show = s[1].split(":", 6);
 
         try {
-            new HaeVarauksetTask().execute().get();
+            new GetReservTask().execute().get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
 
-        buttonIdt1 = haeButtonIdt("Sali1");
-        buttonIdt2 = haeButtonIdt("Sali2");
-        valinnatTiedosto = "valinnat";
-        File file = new File(this.getFilesDir(), valinnatTiedosto);
-        this.file = file;
+        new File(this.getFilesDir(), pendingReservFile);
 
-        if(naytos[2].equals("Sali1")){
+        if (show[2].equals("Sali1")) {
             setContentView(R.layout.activity_paikka1);
             TextView textView = (TextView) findViewById(R.id.naytoksen_data1);
-            textView.setText(naytos[0]);
+            textView.setText(show[0]);
 
-            Button keskeytaVaraus = (Button)  findViewById(R.id.keskeyta_varaus_button1);
+            Button cancel = (Button) findViewById(R.id.keskeyta_varaus_button1);
 
-            keskeytaVaraus.setOnClickListener(new View.OnClickListener() {
+            cancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     finish();
@@ -71,34 +61,34 @@ public class PaikkaActivity extends ActionBarActivity {
             });
 
             final GridView gridview = (GridView) findViewById(R.id.gridView1);
-            gridview.setAdapter(new ButtonAdapter1(this, varatutPaikat));
+            gridview.setAdapter(new ButtonAdapter1(this, reservedSeats));
 
-            Button resetValinnat = (Button) findViewById(R.id.varaus_reset_button1);
-            resetValinnat.setOnClickListener(new View.OnClickListener() {
+            Button reset = (Button) findViewById(R.id.varaus_reset_button1);
+            reset.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    gridview.setAdapter(new ButtonAdapter1(getApplicationContext(), varatutPaikat));
-                    deleteFile("valinnat");
-                    new File(getApplicationContext().getFilesDir(), valinnatTiedosto);
+                    gridview.setAdapter(new ButtonAdapter1(getApplicationContext(), reservedSeats));
+                    deleteFile(pendingReservFile);
+                    new File(getApplicationContext().getFilesDir(), pendingReservFile);
                 }
             });
 
-            Button hyvaksyValinnatButton = (Button) findViewById(R.id.hyvaksy_varaus_button1);
-            hyvaksyValinnatButton.setOnClickListener(new View.OnClickListener() {
+            Button accept = (Button) findViewById(R.id.hyvaksy_varaus_button1);
+            accept.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    hyvaksyValinnat();
+                    acceptChoices();
                 }
             });
 
-        } else{
+        } else {
             setContentView(R.layout.activity_paikka2);
             TextView textView = (TextView) findViewById(R.id.naytoksen_data2);
-            textView.setText(naytos[0]);
+            textView.setText(show[0]);
 
-            Button keskeytaVaraus = (Button)  findViewById(R.id.keskeyta_varaus_button2);
+            Button cancel = (Button) findViewById(R.id.keskeyta_varaus_button2);
 
-            keskeytaVaraus.setOnClickListener(new View.OnClickListener() {
+            cancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     finish();
@@ -106,41 +96,39 @@ public class PaikkaActivity extends ActionBarActivity {
             });
 
             final GridView gridview = (GridView) findViewById(R.id.gridView2);
-            gridview.setAdapter(new ButtonAdapter2(this, varatutPaikat));
+            gridview.setAdapter(new ButtonAdapter2(this, reservedSeats));
 
-            Button resetValinnat = (Button) findViewById(R.id.varaus_reset_button2);
-            resetValinnat.setOnClickListener(new View.OnClickListener() {
+            Button reset = (Button) findViewById(R.id.varaus_reset_button2);
+            reset.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    gridview.setAdapter(new ButtonAdapter2(getApplicationContext(), varatutPaikat));
+                    gridview.setAdapter(new ButtonAdapter2(getApplicationContext(), reservedSeats));
                     deleteFile("valinnat");
-                    new File(getApplicationContext().getFilesDir(), valinnatTiedosto);
+                    new File(getApplicationContext().getFilesDir(), pendingReservFile);
                 }
             });
 
-            Button hyvaksyValinnatButton = (Button) findViewById(R.id.hyvaksy_varaus_button2);
-            hyvaksyValinnatButton.setOnClickListener(new View.OnClickListener() {
+            Button accept = (Button) findViewById(R.id.hyvaksy_varaus_button2);
+            accept.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    hyvaksyValinnat();
+                    acceptChoices();
                 }
             });
-            }
         }
+    }
 
-    private class HaeVarauksetTask extends AsyncTask<Void, Void, Void> {
+    private class GetReservTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... _) {
-            varatutPaikat = new ArrayList<>();
-            String naytosId = naytos[0];
+            reservedSeats = new ArrayList<>();
+            String showId = show[0];
 
             try {
-                varausFile = Network.download(new URL(VARAUS_URL));
-                for (String line : varausFile.split("\n")) {
-                    String[] varaus = line.split(":");
-                    if (varaus[0].equals(naytosId)) {
-                        for(int i = 2; i < varaus.length; i++){
-                            varatutPaikat.add(varaus[i]);
-                        }
+                reservFile = Network.download(new URL(Network.RESERV_URL));
+                for (String line : reservFile.split("\n")) {
+                    String[] reservation = line.split(":");
+                    if (reservation[0].equals(showId)) {
+                        reservedSeats.addAll(Arrays.asList(reservation).subList(2, reservation.length));
                     }
                 }
             } catch (MalformedURLException e) {
@@ -151,111 +139,56 @@ public class PaikkaActivity extends ActionBarActivity {
         }
     }
 
-    private Integer[] haeButtonIdt(String sali){
+    private void acceptChoices() {
+        StringBuilder stringBuilder = new StringBuilder();
+        String[] choices = null;
 
-        if(sali.equals("Sali1")){
-            return new Integer[]{
-                    R.id.paikka1_button1, R.id.paikka1_button2,
-                    R.id.paikka1_button3, R.id.paikka1_button4,
-                    R.id.paikka1_button5, R.id.paikka1_button6,
-                    R.id.paikka1_button7, R.id.paikka1_button8,
-                    R.id.paikka1_button9, R.id.paikka1_button10
-            };
-        }else{
-            return new Integer[]{
-                    R.id.paikka2_button1, R.id.paikka2_button2,
-                    R.id.paikka2_button3, R.id.paikka2_button4,
-                    R.id.paikka2_button5, R.id.paikka2_button6,
-                    R.id.paikka2_button7, R.id.paikka2_button8,
-                    R.id.paikka2_button9, R.id.paikka2_button10,
-                    R.id.paikka2_button11, R.id.paikka2_button12,
-                    R.id.paikka2_button13, R.id.paikka2_button14,
-                    R.id.paikka2_button15
-            };
-        }
-
-    }
-
-    private void hyvaksyValinnat(){
-        /**
-        Button button = (Button) findViewById(R.id.paikka1_button1);
-        PaintDrawable buttonColor = (PaintDrawable) button.getBackground();
-        if(buttonColor.getPaint().getColor() == Color.GREEN){
-            Toast.makeText(getApplicationContext(), "green", Toast.LENGTH_SHORT).show();
-        }
-         **/
-        StringBuffer datax = new StringBuffer("");
-        String s;
-        String[] valinnat = null;
-
-        try{
-            FileInputStream in = openFileInput("valinnat");
+        try {
+            FileInputStream in = openFileInput(pendingReservFile);
             InputStreamReader isr = new InputStreamReader(in);
-            BufferedReader buffreader = new BufferedReader(isr) ;
+            BufferedReader buffreader = new BufferedReader(isr);
 
 
-            String readString = buffreader.readLine ( ) ;
-            while(readString != null){
-                datax.append(readString);
-                readString = buffreader.readLine() ;
+            String readString = buffreader.readLine();
+            while (readString != null) {
+                stringBuilder.append(readString);
+                readString = buffreader.readLine();
             }
 
             isr.close();
-            deleteFile("valinnat");
-            s = datax.toString();
-            valinnat = s.split(":");
+            deleteFile(pendingReservFile);
+            choices = stringBuilder.toString().split(":");
 
-            Toast.makeText(this,datax,Toast.LENGTH_SHORT).show();
-        } catch(IOException e) {
+
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
-        new KirjoitaVarausTask().execute(valinnat);
+        new WriteReservTask().execute(choices);
+        Toast.makeText(this, R.string.reservation_accepted, Toast.LENGTH_SHORT).show();
         finish();
     }
 
-    private class KirjoitaVarausTask extends AsyncTask<String, Void, Void> {
+    private class WriteReservTask extends AsyncTask<String, Void, Void> {
         protected Void doInBackground(String... strings) {
             if (strings.length < 1) {
                 return null;
             }
 
-            StringBuilder varaus = new StringBuilder(naytos[0] + ":" + kayttaja);
-            for (String paikka : strings) {
-                varaus.append(":");
-                varaus.append(paikka);
+            StringBuilder reservation = new StringBuilder(show[0] + ":" + user);
+            for (String seat : strings) {
+                reservation.append(":");
+                reservation.append(seat);
             }
 
-            if (varausFile.endsWith("\n")) {
-                varausFile += varaus.toString();
+            if (reservFile.endsWith("\n")) {
+                reservFile += reservation.toString();
             } else {
-                varausFile += "\n" + varaus.toString();
+                reservFile += "\n" + reservation.toString();
             }
 
-            Network.upload(varausFile, "varaukset.txt");
+            Network.upload(reservFile, "varaukset.txt");
             return null;
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_paikka, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

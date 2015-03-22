@@ -13,6 +13,7 @@
     <string name="title_activity_add_show">Hallitse näytöksiä</string>
     <string name="title_activity_add_user">Hallitse käyttäjiä</string>
     <string name="title_activity_omat_varaukset">Varaukset</string>
+    <string name="reservation_accepted">Varaus tehty</string>
     <string name="reservation_cancelled">Varaus peruttu</string>
     <string name="add_movie_text">Elokuva</string>
     <string name="add_user_button">Lisää</string>
